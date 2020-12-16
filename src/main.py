@@ -17,11 +17,11 @@ async def on_ready():
 async def on_message(message):
     if message.author == bot.user:
         return
-    if not message.content.startswith(prefix):
-        return
     mention = f"<@!{bot.user.id}>"
     if mention in message.content:
         await help(message)
+        return
+    if not message.content.startswith(prefix):
         return
     if message.guild:
         await message.channel.send("개인정보 유출을 방지하기 위해 DM으로 해주세요!")
