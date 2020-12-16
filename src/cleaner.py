@@ -7,8 +7,18 @@ import math
 from pyquery import PyQuery as pq
 import re
 
-sess = requests.Session()
-sess.headers.update({ 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36'})
+sessions = dict()
+
+def make_session_if_not_exists(auth):
+    global sessions
+    id = auth['id']
+    if id in sessions:
+        return sessions[id]
+    sess = requests.Session()
+    sess.headers.update({ 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36'})
+    sessions[id] = sess
+    return sess
+
 
 
 def decode_service_code(_svc : str, _r : str) -> str:
@@ -35,6 +45,7 @@ def decode_service_code(_svc : str, _r : str) -> str:
     return _svc[0:len(_svc) - 10] + t
 
 def get_nickname(auth, _type: str = 'posting', _gall_no: str = '0'):
+    sess = make_session_if_not_exists(auth)
     _id = auth['id']
     gallog_url = f'https://gallog.dcinside.com/{_id}/{_type}'
     _url = f"{gallog_url}/main?gno={_gall_no}"
@@ -43,8 +54,9 @@ def get_nickname(auth, _type: str = 'posting', _gall_no: str = '0'):
     return found
 
 def get_num(auth, _type: str = 'posting', _gall_no: str = '0'):
+    sess = make_session_if_not_exists(auth)
+    login(sess, auth)
     _id = auth['id']
-    login(_id, auth['pw'])
     gallog_url = f'https://gallog.dcinside.com/{_id}/{_type}'
     _url = f"{gallog_url}/main?gno={_gall_no}"
     _d = pq(sess.get(_url).text)
@@ -57,7 +69,11 @@ def get_num(auth, _type: str = 'posting', _gall_no: str = '0'):
     return found
 
 
-def login(_id: str, _pw: str):
+def login(sess, auth):
+    if sess is None:
+        sess = make_session_if_not_exists(auth)
+    _id = auth['id']
+    _pw = auth['pw']
     _d = pq(sess.get('https://www.dcinside.com/').text)
     _data = dict(_d('#login_process input').serialize_dict())
     _data['user_id'] = _id
@@ -73,6 +89,7 @@ def login(_id: str, _pw: str):
     _r = sess.post('https://dcid.dcinside.com/join/member_check.php', data=_data)
     if 'history.back(-1)' in _r.text:
         raise Exception('login error')
+    return sess
 
 
 def solve_recaptcha(_url: str) -> str:
@@ -81,7 +98,7 @@ def solve_recaptcha(_url: str) -> str:
     return ''
 
 
-async def clean(bot, ctx, _id: str, _type: str = 'posting', _gall_no: str = '0'):
+async def clean(bot, ctx, sess, _id: str, _type: str = 'posting', _gall_no: str = '0'):
     channel = ctx.message.channel
 
     if _type not in ['posting', 'comment']:
@@ -120,7 +137,7 @@ async def clean(bot, ctx, _id: str, _type: str = 'posting', _gall_no: str = '0')
             url = f'https://gallog.dcinside.com/{_id}/ajax/log_list_ajax/delete'
             _r_delete = sess.post(url, data=_data).json()
             print(f"{no}: {_r_delete}")
-            if _r_delete['result'] == 'captcha':
+            if _r_delete['result'] in ['captcha', 'fail']:
                 ask = await channel.send(f"""캡챠 발생!
 {gallog_url} 주소로 가서 삭제를 클릭 후 캡챠를 풀어주세요.
 캡챠를 푸신 다음, 이모지를 클릭 해주세요.""")
@@ -133,8 +150,8 @@ async def clean(bot, ctx, _id: str, _type: str = 'posting', _gall_no: str = '0')
                 await channel.send("해제 완료!")
 
 async def loginAndClean(bot, ctx, auth: dict, posting: bool = True, comment: bool = True):
-    login(auth['id'], auth['pw'])
+    sess = login(None, auth)
     if posting:
-        await clean(bot, ctx, auth['id'], 'posting')
+        await clean(bot, ctx, sess, auth['id'], 'posting')
     if comment:
-        await clean(bot, ctx, auth['id'], 'comment')
+        await clean(bot, ctx, sess, auth['id'], 'comment')
