@@ -1,7 +1,6 @@
 from discord.ext import commands
 from discord import Embed
 import cleaner
-import db
 from cleanerbot_token import get_token
 
 prefix = "clb "
