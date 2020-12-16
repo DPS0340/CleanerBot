@@ -53,6 +53,7 @@ async def invokeClean(ctx, posting=True, comment=True):
     if not uid in auths:
         await message.channel.send("로그인 해주세요!")
         return
+    await message.channel.send("삭제중..")
     auth = auths[uid]
     await cleanMatchArg(ctx, auth, posting, comment)
 
