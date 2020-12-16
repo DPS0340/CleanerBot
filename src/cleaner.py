@@ -58,7 +58,7 @@ def solve_recaptcha(_url: str) -> str:
     return ''
 
 
-def clean(_id: str, _type: str = 'posting', _gall_no: str = '0'):
+def clean(message, _id: str, _type: str = 'posting', _gall_no: str = '0'):
     if _type != 'posting':
         _type = 'comment'
     _url = 'https://gallog.dcinside.com/' + _id + '/' + _type + '/main?gno=' + _gall_no
@@ -94,20 +94,15 @@ def clean(_id: str, _type: str = 'posting', _gall_no: str = '0'):
             _r_delete = sess.post(url, data=_data).json()
             print(f"{no}: {_r_delete}")
             if _r_delete['result'] == 'captcha':
+                
                 print('captcha')
                 _data['g-recaptcha-response'] = solve_recaptcha(_p_url)
                 _r_delete = sess.post(url, data=_data).json()
                 print(_r_delete)
 
-def loginAndClean(auth: dict, posting: bool = True, comment: bool = True):
+def loginAndClean(message, auth: dict, posting: bool = True, comment: bool = True):
     login(auth['id'], auth['pw'])
     if posting:
-        clean(auth['id'], 'posting')
+        clean(message, auth['id'], 'posting')
     if comment:
-        clean(auth['id'], 'comment')
-
-if __name__ == '__main__':
-    auth = {'id': '', 'pw': ''}
-    login(auth['id'], auth['pw'])
-    clean(auth['id'])
-    clean(auth['id'], '')
+        clean(message, auth['id'], 'comment')
