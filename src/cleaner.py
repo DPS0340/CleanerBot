@@ -1,9 +1,10 @@
-# https://gist.github.com/74l35rUnn3r/f689bce5b6abb15d0185a4754e4e6da5
+# https://gist.github.com/74l35rUnn3r/f689bce5b6abb15d0185a4754e4e6da5 소스를 기반으로 여러가지 수정
 
 import time
 import re
 import requests
 import math
+from discord import Emoji
 from pyquery import PyQuery as pq
 
 sess = requests.Session()
@@ -97,12 +98,17 @@ async def clean(bot, ctx, _id: str, _type: str = 'posting', _gall_no: str = '0')
             url = f'https://gallog.dcinside.com/{_id}/ajax/log_list_ajax/delete'
             _r_delete = sess.post(url, data=_data).json()
             print(f"{no}: {_r_delete}")
-            # if _r_delete['result'] == 'captcha':
-            ask = await channel.send(f"""캡챠 발생!
-            {gallog_url}로 가서 삭제를 클릭 후 캡챠를 풀어주세요.
-            캡챠를 푸신 다음, 이모지를 클릭 해주세요.""")
-            await bot.add_reaction(ask, 'OK')
-            await bot.wait_for('emoji')
+            if _r_delete['result'] == 'captcha':
+                ask = await channel.send(f"""캡챠 발생!
+    {gallog_url} 주소로 가서 삭제를 클릭 후 캡챠를 풀어주세요.
+    캡챠를 푸신 다음, 이모지를 클릭 해주세요.""")
+                await ask.add_reaction('🆗')
+                
+                def check(reaction, user):
+                    return reaction.message == ask and user == ctx.author and str(reaction.emoji) ==  '🆗'
+
+                await bot.wait_for('reaction_add', check=check)
+                await channel.send("해제 완료!")
 
 async def loginAndClean(bot, ctx, auth: dict, posting: bool = True, comment: bool = True):
     login(auth['id'], auth['pw'])
