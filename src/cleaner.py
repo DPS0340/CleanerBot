@@ -53,7 +53,7 @@ def get_nickname(auth, _type: str = 'posting', _gall_no: str = '0'):
     found = _d('.nick_name').text()
     return found
 
-def get_num(auth, _type: str = 'posting', _gall_no: str = '0'):
+def get_nickname_number(auth, _type: str = 'posting', _gall_no: str = '0'):
     sess = make_session_if_not_exists(auth)
     login(sess, auth)
     _id = auth['id']
@@ -139,8 +139,11 @@ async def clean(bot, ctx, sess, _id: str, _type: str = 'posting', _gall_no: str 
                 
                 def check(reaction, user):
                     return reaction.message == ask and user == ctx.author and str(reaction.emoji) ==  '🆗'
-
-                await bot.wait_for('reaction_add', check=check, timeout=180)
+                
+                try:
+                    await bot.wait_for('reaction_add', check=check, timeout=300)
+                except:
+                    return
                 await channel.send("해제 완료!")
 
 async def loginAndClean(bot, ctx, auth: dict, posting: bool = True, comment: bool = True):
