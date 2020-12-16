@@ -92,12 +92,6 @@ def login(sess, auth):
     return sess
 
 
-def solve_recaptcha(_url: str) -> str:
-    input('captcha')
-    # secret :D
-    return ''
-
-
 async def clean(bot, ctx, sess, _id: str, _type: str = 'posting', _gall_no: str = '0'):
     channel = ctx.message.channel
 
