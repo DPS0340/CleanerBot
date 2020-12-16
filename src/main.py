@@ -48,25 +48,30 @@ async def login(ctx, id, pw):
     auths[ctx.author.id] = {'id': id, 'pw': pw}
     await message.channel.send("로그인이 완료되었습니다!")
 
-@bot.command()
-async def clean(ctx):
+async def invokeClean(ctx, posting=True, comment=True):
     message = ctx.message
     uid = ctx.author.id
     if not uid in auths:
         await message.channel.send("로그인 해주세요!")
         return
     auth = auths[uid]
-    cleaner.loginAndClean(message, auth)
+    cleanMatchArg(ctx, auth, posting, comment)
+
+async def cleanMatchArg(ctx, auth, posting=True, comment=True):
+    cleaner.loginAndClean(message, auth, posting, comment)
 
 @bot.command()
 async def clean(ctx):
-    message = ctx.message
-    uid = ctx.author.id
-    if not uid in auths:
-        await message.channel.send("로그인 해주세요!")
-        return
-    auth = auths[uid]
-    cleaner.loginAndClean(message, auth)
+    invokeClean(ctx, posting=True, comment=True)
+
+@bot.command()
+async def post(ctx):
+    invokeClean(ctx, posting=True, comment=False)
+
+@bot.command()
+async def comment(ctx):
+    invokeClean(ctx, posting=False, comment=True)
+
 
 @bot.command()
 async def stat(ctx):
