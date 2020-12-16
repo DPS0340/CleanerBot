@@ -72,7 +72,6 @@ async def post(ctx):
 async def comment(ctx):
     await invokeClean(ctx, posting=False, comment=True)
 
-
 @bot.command()
 async def stat(ctx):
     message = ctx.message
@@ -81,7 +80,10 @@ async def stat(ctx):
         await message.channel.send("로그인 해주세요!")
         return
     auth = auths[uid]
-    cleaner.loginAndClean(message, auth)
+    nickname = cleaner.get_nickname(auth)
+    postNum = cleaner.get_num(auth, _type='posting')
+    commentNum = cleaner.get_num(auth, _type='comment')
+    await message.channel.send(f"사용자 {nickname}: 글 {postNum}개 댓글 {commentNum}개")
 
 def matchPrefix(message):
     return message.content.startswith(prefix)

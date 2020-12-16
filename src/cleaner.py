@@ -4,8 +4,8 @@ import time
 import re
 import requests
 import math
-from discord import Emoji
 from pyquery import PyQuery as pq
+import re
 
 sess = requests.Session()
 sess.headers.update({ 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36'})
@@ -33,6 +33,28 @@ def decode_service_code(_svc : str, _r : str) -> str:
     for i in range(len(_r)):
         t += chr(int(2 * (_r[i] - i - 1) / (13 - i - 1)))
     return _svc[0:len(_svc) - 10] + t
+
+def get_nickname(auth, _type: str = 'posting', _gall_no: str = '0'):
+    _id = auth['id']
+    gallog_url = f'https://gallog.dcinside.com/{_id}/{_type}'
+    _url = f"{gallog_url}/main?gno={_gall_no}"
+    _d = pq(sess.get(_url).text)
+    found = _d('.nick_name').text()
+    return found
+
+def get_num(auth, _type: str = 'posting', _gall_no: str = '0'):
+    _id = auth['id']
+    login(_id, auth['pw'])
+    gallog_url = f'https://gallog.dcinside.com/{_id}/{_type}'
+    _url = f"{gallog_url}/main?gno={_gall_no}"
+    _d = pq(sess.get(_url).text)
+    raw_num = _d('.tit > .num').text()
+    raw_num = raw_num.replace(',', '')
+    print(raw_num)
+    regex = re.compile('[\(](\d+)[\)]')
+    matched = regex.match(raw_num)
+    found = matched.group(1)
+    return found
 
 
 def login(_id: str, _pw: str):
@@ -100,8 +122,8 @@ async def clean(bot, ctx, _id: str, _type: str = 'posting', _gall_no: str = '0')
             print(f"{no}: {_r_delete}")
             if _r_delete['result'] == 'captcha':
                 ask = await channel.send(f"""캡챠 발생!
-    {gallog_url} 주소로 가서 삭제를 클릭 후 캡챠를 풀어주세요.
-    캡챠를 푸신 다음, 이모지를 클릭 해주세요.""")
+{gallog_url} 주소로 가서 삭제를 클릭 후 캡챠를 풀어주세요.
+캡챠를 푸신 다음, 이모지를 클릭 해주세요.""")
                 await ask.add_reaction('🆗')
                 
                 def check(reaction, user):
