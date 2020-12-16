@@ -1,38 +1,46 @@
-import discord
+from discord.ext import commands
 import cleaner
 import db
 from cleanerbot_token import get_token
 
 prefix = "clb "
-
-class MyClient(discord.Client):
-    async def on_ready(self):
-        print('Logged on as {0}!'.format(self.user))
-
-    async def on_message(self, message):
-        if message.author == self.user or not self.matchPrefix(message):
-            return
-        if not self.isDM(message):
-            await message.channel.send('개인정보 유출을 방지하기 위해 DM으로 해주세요!')
-            return
-        if message.content.startswith(f'{prefix}clean'):
-            await self.clean(message)
-            return
-        
-    async def clean(self, message):
-        await message.channel.send("id를 입력해 주세요:")
-        id = await client.wait_for('message', timeout=120)
-        await message.channel.send("패스워드를 입력해 주세요:")
-        pw = await client.wait_for('message', timeout=120)
-        cleaner.loginAndClean({'id': id.content, 'pw': pw.content})
-
-    def matchPrefix(self, message):
-        return message.content.startswith(prefix)
-    
-    def isDM(self, message):
-        return not message.guild
-
+bot = commands.Bot(command_prefix='$')
 token = get_token()
 
-client = MyClient()
-client.run(token)
+auths = dict()
+
+@bot.event()
+async def on_ready():
+    print('Logged on as {0}!'.format(bot.user))
+
+@client.event
+async def on_message(message):
+    if message.guild:
+        await message.author.send(f"")
+    await bot.process_commands(message)
+
+
+@bot.command()
+async def clean(message):
+    await message.channel.send("id를 입력해 주세요:")
+    id = await bot.wait_for('message', timeout=120)
+    await message.channel.send("패스워드를 입력해 주세요:")
+    pw = await bot.wait_for('message', timeout=120)
+    auths[message.user.id] = {'id': id, 'pw': pw}
+    await message.channel.send("")
+
+@bot.command()
+async def clean(message):
+    uid = message.user.id
+    auths.has_key(uid)
+    auth = auths[message.user.id]
+    cleaner.loginAndClean(message, {'id': id.content, 'pw': pw.content})
+
+def matchPrefix(message):
+    return message.content.startswith(prefix)
+
+def isDM(message):
+    return not message.guild
+
+
+bot.run(token)
