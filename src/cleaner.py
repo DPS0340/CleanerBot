@@ -140,7 +140,7 @@ async def clean(bot, ctx, sess, _id: str, _type: str = 'posting', _gall_no: str 
                 def check(reaction, user):
                     return reaction.message == ask and user == ctx.author and str(reaction.emoji) ==  '🆗'
 
-                await bot.wait_for('reaction_add', check=check)
+                await bot.wait_for('reaction_add', check=check, timeout=180)
                 await channel.send("해제 완료!")
 
 async def loginAndClean(bot, ctx, auth: dict, posting: bool = True, comment: bool = True):
