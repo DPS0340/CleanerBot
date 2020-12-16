@@ -44,7 +44,7 @@ def decode_service_code(_svc : str, _r : str) -> str:
         t += chr(int(2 * (_r[i] - i - 1) / (13 - i - 1)))
     return _svc[0:len(_svc) - 10] + t
 
-def get_nickname(auth, _type: str = 'posting', _gall_no: str = '0'):
+async def get_nickname(auth, _type: str = 'posting', _gall_no: str = '0'):
     sess = make_session_if_not_exists(auth)
     _id = auth['id']
     gallog_url = f'https://gallog.dcinside.com/{_id}/{_type}'
@@ -53,7 +53,11 @@ def get_nickname(auth, _type: str = 'posting', _gall_no: str = '0'):
     found = _d('.nick_name').text()
     return found
 
-def get_nickname_number(auth, _type: str = 'posting', _gall_no: str = '0'):
+<<<<<<< HEAD
+async def get_num(auth, _type: str = 'posting', _gall_no: str = '0'):
+=======
+def get_num(auth, _type: str = 'posting', _gall_no: str = '0'):
+>>>>>>> parent of 28ef157... Better error handling
     sess = make_session_if_not_exists(auth)
     login(sess, auth)
     _id = auth['id']
@@ -62,7 +66,6 @@ def get_nickname_number(auth, _type: str = 'posting', _gall_no: str = '0'):
     _d = pq(sess.get(_url).text)
     raw_num = _d('.tit > .num').text()
     raw_num = raw_num.replace(',', '')
-    print(raw_num)
     regex = re.compile('[\(](\d+)[\)]')
     matched = regex.match(raw_num)
     found = matched.group(1)
@@ -139,11 +142,16 @@ async def clean(bot, ctx, sess, _id: str, _type: str = 'posting', _gall_no: str 
                 
                 def check(reaction, user):
                     return reaction.message == ask and user == ctx.author and str(reaction.emoji) ==  '🆗'
+<<<<<<< HEAD
                 
                 try:
                     await bot.wait_for('reaction_add', check=check, timeout=300)
-                except:
+                except TimeoutError:
                     return
+=======
+
+                await bot.wait_for('reaction_add', check=check, timeout=180)
+>>>>>>> parent of 28ef157... Better error handling
                 await channel.send("해제 완료!")
 
 async def loginAndClean(bot, ctx, auth: dict, posting: bool = True, comment: bool = True):

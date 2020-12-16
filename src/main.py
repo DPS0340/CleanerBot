@@ -1,7 +1,9 @@
+import asyncio
 from discord.ext import commands
 from discord import Embed
 import cleaner
 from cleanerbot_token import get_token
+import threading
 
 prefix = "clb "
 bot = commands.Bot(command_prefix=commands.when_mentioned_or(prefix))
@@ -65,16 +67,20 @@ async def cleanMatchArg(ctx, auth, posting=True, comment=True):
 
 @bot.command()
 async def clean(ctx):
-    await invokeClean(ctx, posting=True, comment=True)
+    loop = asyncio.new_event_loop()
+    t = asyncio.run_coroutine_threadsafe(invokeClean(ctx, posting=True, comment=True), loop)
+    t.start()
 
 @bot.command()
 async def post(ctx):
-    await invokeClean(ctx, posting=True, comment=False)
-
+    loop = asyncio.new_event_loop()
+    t = asyncio.run_coroutine_threadsafe(invokeClean(ctx, posting=True, comment=False), loop)
+    t.start()
 @bot.command()
 async def comment(ctx):
-    await invokeClean(ctx, posting=False, comment=True)
-
+    loop = asyncio.new_event_loop()
+    t = asyncio.run_coroutine_threadsafe(invokeClean(ctx, posting=False, comment=True), loop)
+    t.start()
 @bot.command()
 async def stat(ctx):
     message = ctx.message
@@ -83,9 +89,9 @@ async def stat(ctx):
         await message.channel.send("로그인 해주세요!")
         return
     auth = auths[uid]
-    nickname = cleaner.get_nickname(auth)
-    postNum = cleaner.get_num(auth, _type='posting')
-    commentNum = cleaner.get_num(auth, _type='comment')
+    nickname = await cleaner.get_nickname(auth)
+    postNum = await cleaner.get_num(auth, _type='posting')
+    commentNum = await cleaner.get_num(auth, _type='comment')
     await message.channel.send(f"사용자 {nickname}: 글 {postNum}개 댓글 {commentNum}개")
 
 def matchPrefix(message):
