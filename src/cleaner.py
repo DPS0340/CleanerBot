@@ -75,9 +75,10 @@ def clean(_id: str, _type: str = 'posting', _gall_no: str = '0'):
         _r = _r[13:_r.find("');")]
         time.sleep(1)   # 차단먹지마
         for _li in _d('ul.cont_listbox > li').items():
+            no = _li.attr('data-no')
             _data = {
                 'ci_t': sess.cookies.get('ci_c'),
-                'no': _li.attr('data-no'),
+                'no': no,
                 'service_code': decode_service_code(_d('input[name="service_code"]').val(), _r)
             }
             header = {
@@ -88,14 +89,10 @@ def clean(_id: str, _type: str = 'posting', _gall_no: str = '0'):
                 'X-Requested-With': 'XMLHttpRequest'
             }
             sess.headers.update(header)
-            #print(json.dumps(_data, indent=2, ensure_ascii=False))
             time.sleep(1)   # 차단먹지마
             url = f'https://gallog.dcinside.com/{_id}/ajax/log_list_ajax/delete'
             _r_delete = sess.post(url, data=_data).json()
-            print(_data)
-            print(header)
-            print(url)
-            print(_r_delete)
+            print(f"{no}: {_r_delete}")
             if _r_delete['result'] == 'captcha':
                 print('captcha')
                 _data['g-recaptcha-response'] = solve_recaptcha(_p_url)
