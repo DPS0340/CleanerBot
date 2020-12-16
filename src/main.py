@@ -67,20 +67,16 @@ async def cleanMatchArg(ctx, auth, posting=True, comment=True):
 
 @bot.command()
 async def clean(ctx):
-    loop = asyncio.new_event_loop()
-    t = asyncio.run_coroutine_threadsafe(invokeClean(ctx, posting=True, comment=True), loop)
-    t.start()
+    await invokeClean(ctx, True, True)
 
 @bot.command()
 async def post(ctx):
-    loop = asyncio.new_event_loop()
-    t = asyncio.run_coroutine_threadsafe(invokeClean(ctx, posting=True, comment=False), loop)
-    t.start()
+    await invokeClean(ctx, True, False)
+
 @bot.command()
 async def comment(ctx):
-    loop = asyncio.new_event_loop()
-    t = asyncio.run_coroutine_threadsafe(invokeClean(ctx, posting=False, comment=True), loop)
-    t.start()
+    await invokeClean(ctx, False, True)
+
 @bot.command()
 async def stat(ctx):
     message = ctx.message
