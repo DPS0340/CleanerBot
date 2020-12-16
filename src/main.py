@@ -55,22 +55,22 @@ async def invokeClean(ctx, posting=True, comment=True):
         await message.channel.send("로그인 해주세요!")
         return
     auth = auths[uid]
-    cleanMatchArg(ctx, auth, posting, comment)
+    await cleanMatchArg(ctx, auth, posting, comment)
 
 async def cleanMatchArg(ctx, auth, posting=True, comment=True):
-    cleaner.loginAndClean(message, auth, posting, comment)
+    await cleaner.loginAndClean(message, auth, posting, comment)
 
 @bot.command()
 async def clean(ctx):
-    invokeClean(ctx, posting=True, comment=True)
+    await invokeClean(ctx, posting=True, comment=True)
 
 @bot.command()
 async def post(ctx):
-    invokeClean(ctx, posting=True, comment=False)
+    await invokeClean(ctx, posting=True, comment=False)
 
 @bot.command()
 async def comment(ctx):
-    invokeClean(ctx, posting=False, comment=True)
+    await invokeClean(ctx, posting=False, comment=True)
 
 
 @bot.command()

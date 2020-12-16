@@ -58,7 +58,7 @@ def solve_recaptcha(_url: str) -> str:
     return ''
 
 
-def clean(ctx, _id: str, _type: str = 'posting', _gall_no: str = '0'):
+async def clean(ctx, _id: str, _type: str = 'posting', _gall_no: str = '0'):
     if _type != 'posting':
         _type = 'comment'
     _url = 'https://gallog.dcinside.com/' + _id + '/' + _type + '/main?gno=' + _gall_no
@@ -100,9 +100,9 @@ def clean(ctx, _id: str, _type: str = 'posting', _gall_no: str = '0'):
                 _r_delete = sess.post(url, data=_data).json()
                 print(_r_delete)
 
-def loginAndClean(ctx, auth: dict, posting: bool = True, comment: bool = True):
+async def loginAndClean(ctx, auth: dict, posting: bool = True, comment: bool = True):
     login(auth['id'], auth['pw'])
     if posting:
-        clean(ctx, auth['id'], 'posting')
+        await clean(ctx, auth['id'], 'posting')
     if comment:
-        clean(ctx, auth['id'], 'comment')
+        await clean(ctx, auth['id'], 'comment')
