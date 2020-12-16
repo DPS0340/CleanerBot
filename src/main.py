@@ -35,6 +35,7 @@ async def help(message):
     embed.add_field(name=f"{prefix}clean", value="글과 댓글을 지웁니다.", inline=False)
     embed.add_field(name=f"{prefix}post", value="글을 지웁니다.", inline=False)
     embed.add_field(name=f"{prefix}comment", value="댓글을 지웁니다.", inline=False)
+    embed.add_field(name=f"Github", value="https://github.com/DPS0340/CleanerBot", inline=False)
 
     await message.channel.send(embed=embed)
 
