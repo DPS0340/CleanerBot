@@ -58,10 +58,14 @@ def solve_recaptcha(_url: str) -> str:
     return ''
 
 
-async def clean(ctx, _id: str, _type: str = 'posting', _gall_no: str = '0'):
-    if _type != 'posting':
-        _type = 'comment'
-    _url = 'https://gallog.dcinside.com/' + _id + '/' + _type + '/main?gno=' + _gall_no
+async def clean(bot, ctx, _id: str, _type: str = 'posting', _gall_no: str = '0'):
+    channel = ctx.message.channel
+
+    if _type not in ['posting', 'comment']:
+        print("Wrong type")
+        return
+    gallog_url = f'https://gallog.dcinside.com/{_id}/{_type}'
+    _url = f"{gallog_url}/main?gno={_gall_no}"
     _d = pq(sess.get(_url).text)
     _last = _d('.cont_head.clear > .tit > .num').text()
     _last = math.ceil(int(_last[1:-1].replace(',', '')) / 20)
@@ -69,9 +73,9 @@ async def clean(ctx, _id: str, _type: str = 'posting', _gall_no: str = '0'):
     time.sleep(1)   # 차단먹지마
 
     for _page in range(_last, 0, -1):
-        _p_url = _url + '&p=' + str(_page)
+        _p_url = f"{_url}&p={str(_page)}"
         _d = pq(sess.get(_p_url).text)
-        _r = _d('script[type="text/javascript"]').filter(lambda i, e: 'var _r =' in pq(e).text()).text()
+        _r = _d('script[type="text/javascript"]').filter(lambda _, e: 'var _r =' in pq(e).text()).text()
         _r = _r[13:_r.find("');")]
         time.sleep(1)   # 차단먹지마
         for _li in _d('ul.cont_listbox > li').items():
@@ -93,16 +97,16 @@ async def clean(ctx, _id: str, _type: str = 'posting', _gall_no: str = '0'):
             url = f'https://gallog.dcinside.com/{_id}/ajax/log_list_ajax/delete'
             _r_delete = sess.post(url, data=_data).json()
             print(f"{no}: {_r_delete}")
-            if _r_delete['result'] == 'captcha':
+            # if _r_delete['result'] == 'captcha':
+            ask = await channel.send(f"""캡챠 발생!
+            {gallog_url}로 가서 삭제를 클릭 후 캡챠를 풀어주세요.
+            캡챠를 푸신 다음, 이모지를 클릭 해주세요.""")
+            await bot.add_reaction(ask, 'OK')
+            await bot.wait_for('emoji')
 
-                print('captcha')
-                _data['g-recaptcha-response'] = solve_recaptcha(_p_url)
-                _r_delete = sess.post(url, data=_data).json()
-                print(_r_delete)
-
-async def loginAndClean(ctx, auth: dict, posting: bool = True, comment: bool = True):
+async def loginAndClean(bot, ctx, auth: dict, posting: bool = True, comment: bool = True):
     login(auth['id'], auth['pw'])
     if posting:
-        await clean(ctx, auth['id'], 'posting')
+        await clean(bot, ctx, auth['id'], 'posting')
     if comment:
-        await clean(ctx, auth['id'], 'comment')
+        await clean(bot, ctx, auth['id'], 'comment')

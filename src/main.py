@@ -58,7 +58,7 @@ async def invokeClean(ctx, posting=True, comment=True):
     await cleanMatchArg(ctx, auth, posting, comment)
 
 async def cleanMatchArg(ctx, auth, posting=True, comment=True):
-    await cleaner.loginAndClean(message, auth, posting, comment)
+    await cleaner.loginAndClean(bot, ctx, auth, posting, comment)
 
 @bot.command()
 async def clean(ctx):
