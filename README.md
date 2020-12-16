@@ -6,4 +6,6 @@
 
 ## 클리너 코어 부분
 
-https://gist.github.com/74l35rUnn3r/f689bce5b6abb15d0185a4754e4e6da5 에서 가져왔습니다.
+https://gist.github.com/74l35rUnn3r/f689bce5b6abb15d0185a4754e4e6da5 의 코드를 가져왔습니다.
+
+이 자리를 빌어서 감사를 표합니다.
