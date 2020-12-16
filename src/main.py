@@ -1,5 +1,5 @@
 from discord.ext import commands
-from discord import Embed
+from discord import Embed, message
 import cleaner
 import db
 from cleanerbot_token import get_token
@@ -30,29 +30,53 @@ async def on_message(message):
 async def help(message):
     embed = Embed(title="CLEANERBOT 사용 설명서", color=0x95e4fe)
 
-    embed.add_field(name=f"{prefix}login", value="id와 pw를 통해 로그인합니다.", inline=False)
+    embed.add_field(name=f"{prefix}login [id] [pw]", value="id와 pw를 통해 로그인합니다.", inline=False)
     embed.add_field(name="제한 사항", value="이후 커맨드는 로그인된 사용자만 사용 가능합니다.", inline=True)
     embed.add_field(name=f"{prefix}stat", value="글과 댓글 갯수를 보여줍니다.", inline=False)
     embed.add_field(name=f"{prefix}clean", value="글과 댓글을 지웁니다.", inline=False)
-    embed.add_field(name=f"{prefix}commen", value="댓글을 지웁니다.", inline=False)
+    embed.add_field(name=f"{prefix}post", value="글을 지웁니다.", inline=False)
+    embed.add_field(name=f"{prefix}comment", value="댓글을 지웁니다.", inline=False)
 
     await message.channel.send(embed=embed)
 
-@bot.command
-async def clean(message):
-    await message.channel.send("id를 입력해 주세요:")
-    id = await bot.wait_for('message', timeout=120)
-    await message.channel.send("패스워드를 입력해 주세요:")
-    pw = await bot.wait_for('message', timeout=120)
-    auths[message.user.id] = {'id': id, 'pw': pw}
+@bot.command()
+async def login(ctx, id, pw):
+    message = ctx.message
+    if not (id and pw):
+        await message.channel.send("잘못된 인자입니다!")
+        return
+    auths[ctx.author.id] = {'id': id, 'pw': pw}
     await message.channel.send("로그인이 완료되었습니다!")
 
-@bot.command
-async def clean(message):
-    uid = message.user.id
-    auths.has_key(uid)
-    auth = auths[message.user.id]
-    cleaner.loginAndClean(message, {'id': id.content, 'pw': pw.content})
+@bot.command()
+async def clean(ctx):
+    message = ctx.message
+    uid = ctx.author.id
+    if not uid in auths:
+        await message.channel.send("로그인 해주세요!")
+        return
+    auth = auths[uid]
+    cleaner.loginAndClean(message, auth)
+
+@bot.command()
+async def clean(ctx):
+    message = ctx.message
+    uid = ctx.author.id
+    if not uid in auths:
+        await message.channel.send("로그인 해주세요!")
+        return
+    auth = auths[uid]
+    cleaner.loginAndClean(message, auth)
+
+@bot.command()
+async def stat(ctx):
+    message = ctx.message
+    uid = ctx.author.id
+    if not uid in auths:
+        await message.channel.send("로그인 해주세요!")
+        return
+    auth = auths[uid]
+    cleaner.loginAndClean(message, auth)
 
 def matchPrefix(message):
     return message.content.startswith(prefix)
