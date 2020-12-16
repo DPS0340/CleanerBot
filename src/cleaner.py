@@ -69,7 +69,6 @@ def clean(_id: str, _type: str = 'posting', _gall_no: str = '0'):
     time.sleep(1)   # 차단먹지마
 
     for _page in range(_last, 0, -1):
-        #print('now', _page, 'page')
         _p_url = _url + '&p=' + str(_page)
         _d = pq(sess.get(_p_url).text)
         _r = _d('script[type="text/javascript"]').filter(lambda i, e: 'var _r =' in pq(e).text()).text()
@@ -81,18 +80,21 @@ def clean(_id: str, _type: str = 'posting', _gall_no: str = '0'):
                 'no': _li.attr('data-no'),
                 'service_code': decode_service_code(_d('input[name="service_code"]').val(), _r)
             }
-            sess.headers.update({
+            header = {
                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
                 'Host': 'gallog.dcinside.com',
                 'Origin': 'https://gallog.dcinside.com',
                 'Referer': _p_url,
                 'X-Requested-With': 'XMLHttpRequest'
-            })
+            }
+            sess.headers.update(header)
             #print(json.dumps(_data, indent=2, ensure_ascii=False))
             time.sleep(1)   # 차단먹지마
             url = f'https://gallog.dcinside.com/{_id}/ajax/log_list_ajax/delete'
-            print(url)
             _r_delete = sess.post(url, data=_data).json()
+            print(_data)
+            print(header)
+            print(url)
             print(_r_delete)
             if _r_delete['result'] == 'captcha':
                 print('captcha')
@@ -100,10 +102,12 @@ def clean(_id: str, _type: str = 'posting', _gall_no: str = '0'):
                 _r_delete = sess.post(url, data=_data).json()
                 print(_r_delete)
 
-def loginAndClean(auth: dict):
+def loginAndClean(auth: dict, posting: bool = True, comment: bool = True):
     login(auth['id'], auth['pw'])
-    clean(auth['id'])
-    clean(auth['id'], '')
+    if posting:
+        clean(auth['id'], 'posting')
+    if comment:
+        clean(auth['id'], 'comment')
 
 if __name__ == '__main__':
     auth = {'id': '', 'pw': ''}
