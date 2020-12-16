@@ -17,6 +17,8 @@ async def on_ready():
 async def on_message(message):
     if message.author == bot.user:
         return
+    if prefix not in message.content:
+        return
     mention = f"<@!{bot.user.id}>"
     if mention in message.content:
         await help(message)
