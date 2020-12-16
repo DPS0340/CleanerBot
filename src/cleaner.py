@@ -48,7 +48,7 @@ def get_nickname(auth, _type: str = 'posting', _gall_no: str = '0'):
     sess = make_session_if_not_exists(auth)
     _id = auth['id']
     gallog_url = f'https://gallog.dcinside.com/{_id}/{_type}'
-    _url = f"{gallog_url}/{_gall_no}"
+    _url = f"{gallog_url}/main?gno={_gall_no}"
     _d = pq(sess.get(_url).text)
     found = _d('.nick_name').text()
     return found
@@ -58,7 +58,7 @@ def get_num(auth, _type: str = 'posting', _gall_no: str = '0'):
     login(sess, auth)
     _id = auth['id']
     gallog_url = f'https://gallog.dcinside.com/{_id}/{_type}'
-    _url = f"{gallog_url}/{_gall_no}"
+    _url = f"{gallog_url}/main?gno={_gall_no}"
     _d = pq(sess.get(_url).text)
     raw_num = _d('.tit > .num').text()
     raw_num = raw_num.replace(',', '')
@@ -99,7 +99,7 @@ async def clean(bot, ctx, sess, _id: str, _type: str = 'posting', _gall_no: str 
         print("Wrong type")
         return
     gallog_url = f'https://gallog.dcinside.com/{_id}/{_type}'
-    _url = f"{gallog_url}/{_gall_no}"
+    _url = f"{gallog_url}/main?gno={_gall_no}"
     _d = pq(sess.get(_url).text)
     _last = _d('.cont_head.clear > .tit > .num').text()
     _last = math.ceil(int(_last[1:-1].replace(',', '')) / 20)
