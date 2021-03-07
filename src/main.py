@@ -3,7 +3,8 @@ from discord.ext import commands
 from discord import Embed
 import cleaner
 from cleanerbot_token import get_token
-import threading
+from log import logger
+
 
 prefix = "clb "
 bot = commands.Bot(command_prefix=commands.when_mentioned_or(prefix))
@@ -44,7 +45,7 @@ async def help(message):
     await message.channel.send(embed=embed)
 
 @bot.command()
-async def login(ctx, id, pw):
+async def login(ctx: commands.Context, id, pw):
     message = ctx.message
     if not (id and pw):
         await message.channel.send("잘못된 인자입니다!")
@@ -52,7 +53,7 @@ async def login(ctx, id, pw):
     auths[ctx.author.id] = {'id': id, 'pw': pw}
     await message.channel.send("로그인이 완료되었습니다!")
 
-async def invokeClean(ctx, posting=True, comment=True):
+async def invokeClean(ctx: commands.Context, posting=True, comment=True):
     message = ctx.message
     uid = ctx.author.id
     if not uid in auths:
@@ -62,23 +63,23 @@ async def invokeClean(ctx, posting=True, comment=True):
     auth = auths[uid]
     await cleanMatchArg(ctx, auth, posting, comment)
 
-async def cleanMatchArg(ctx, auth, posting=True, comment=True):
+async def cleanMatchArg(ctx: commands.Context, auth, posting=True, comment=True):
     await cleaner.loginAndClean(bot, ctx, auth, posting, comment)
 
 @bot.command()
-async def clean(ctx):
+async def clean(ctx: commands.Context):
     await invokeClean(ctx, True, True)
 
 @bot.command()
-async def post(ctx):
+async def post(ctx: commands.Context):
     await invokeClean(ctx, True, False)
 
 @bot.command()
-async def comment(ctx):
+async def comment(ctx: commands.Context):
     await invokeClean(ctx, False, True)
 
 @bot.command()
-async def stat(ctx):
+async def stat(ctx: commands.Context):
     message = ctx.message
     uid = ctx.author.id
     if not uid in auths:

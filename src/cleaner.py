@@ -4,13 +4,17 @@ import time
 import re
 import math
 import aiohttp
+from aiohttp.client import request
+import discord
 from pyquery import PyQuery as pq
 import json
+from log import logger
+from discord.ext import commands
 
 sessions = dict()
 header = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36'}
 
-def make_session_if_not_exists(auth):
+def make_session_if_not_exists(auth: dict) -> aiohttp.ClientSession:
     global sessions
     id = auth['id']
     if id in sessions:
@@ -19,7 +23,7 @@ def make_session_if_not_exists(auth):
     sessions[id] = sess
     return sess
 
-def set_session(sess, id):
+def set_session(sess: aiohttp.ClientSession, id: int) -> None:
     global sessions
     sessions[id] = sess
 
@@ -48,7 +52,7 @@ def decode_service_code(_svc : str, _r : str) -> str:
         t += chr(int(2 * (_r[i] - i - 1) / (13 - i - 1)))
     return _svc[0:len(_svc) - 10] + t
 
-async def get_nickname(auth, _type: str = 'posting', _gall_no: str = '0'):
+async def get_nickname(auth, _type: str = 'posting', _gall_no: str = '0') -> str:
     sess = make_session_if_not_exists(auth)
     _id = auth['id']
     gallog_url = f'https://gallog.dcinside.com/{_id}/{_type}'
@@ -59,7 +63,7 @@ async def get_nickname(auth, _type: str = 'posting', _gall_no: str = '0'):
     found = _d('.nick_name').text()
     return found
 
-async def get_num(auth, _type: str = 'posting', _gall_no: str = '0'):
+async def get_num(auth, _type: str = 'posting', _gall_no: str = '0') -> str:
     sess = make_session_if_not_exists(auth)
     await login(sess, auth)
     _id = auth['id']
@@ -76,7 +80,7 @@ async def get_num(auth, _type: str = 'posting', _gall_no: str = '0'):
     return found
 
 
-async def login(sess, auth):
+async def login(sess: aiohttp.ClientSession, auth: dict) -> aiohttp.ClientSession:
     if sess is None:
         sess = make_session_if_not_exists(auth)
     _id = auth['id']
@@ -105,7 +109,7 @@ async def login(sess, auth):
     return sess
 
 
-async def clean(bot, ctx, sess, _id: str, _type: str = 'posting', _gall_no: str = '0'):
+async def clean(bot: discord.Client, ctx: commands.Context, sess, _id: str, _type: str = 'posting', _gall_no: str = '0'):
     channel = ctx.message.channel
 
     if _type not in ['posting', 'comment']:
@@ -119,7 +123,7 @@ async def clean(bot, ctx, sess, _id: str, _type: str = 'posting', _gall_no: str 
     _last = _d('.cont_head.clear > .tit > .num').text()
     _last = math.ceil(int(_last[1:-1].replace(',', '')) / 20)
     print(_last, 'pages')
-    time.sleep(1)   # 차단먹지마
+    time.sleep(1)
 
     for _page in range(_last, 0, -1):
         _p_url = f"{_url}&p={str(_page)}"
@@ -129,7 +133,7 @@ async def clean(bot, ctx, sess, _id: str, _type: str = 'posting', _gall_no: str 
         _d = pq(text)
         _r = _d('script[type="text/javascript"]').filter(lambda _, e: 'var _r =' in pq(e).text()).text()
         _r = _r[13:_r.find("');")]
-        time.sleep(1)   # 차단먹지마
+        time.sleep(1)
         for _li in _d('ul.cont_listbox > li').items():
             no = _li.attr('data-no')
             _data = {
@@ -145,18 +149,19 @@ async def clean(bot, ctx, sess, _id: str, _type: str = 'posting', _gall_no: str 
                 'Referer': _p_url,
                 'X-Requested-With': 'XMLHttpRequest'
             }
-            time.sleep(1)   # 차단먹지마
+            time.sleep(1)
             url = f'https://gallog.dcinside.com/{_id}/ajax/log_list_ajax/delete'
             res = await sess.post(url, data=_data, headers=new_header)
             text = await res.read()
             _r_delete = json.loads(text)
             print(f"{no}: {_r_delete}")
             if _r_delete['result'] in ['captcha', 'fail']:
+                logger.info(f"Captcha generated")
                 ask = await channel.send(f"""캡챠 발생!
 {gallog_url} 주소로 가서 삭제를 클릭 후 캡챠를 풀어주세요.
 캡챠를 푸신 다음, 이모지를 클릭 해주세요.""")
                 await ask.add_reaction('🆗')
-                
+                logger.info(f"Reaction clicked")
                 def check(reaction, user):
                     return reaction.message == ask and user == ctx.author and str(reaction.emoji) ==  '🆗'
                 
@@ -166,9 +171,13 @@ async def clean(bot, ctx, sess, _id: str, _type: str = 'posting', _gall_no: str 
                     return
                 await channel.send("해제 완료!")
 
-async def loginAndClean(bot, ctx, auth: dict, posting: bool = True, comment: bool = True):
+async def loginAndClean(bot: discord.Client, ctx: commands.Context, auth: dict, posting: bool = True, comment: bool = True):
+    logger.info(f"author: {ctx.author}")
+    logger.info(f"message content: {ctx.message.content}")
+    logger.info(f"posting: {posting}, comment: {comment}")
     sess = await login(None, auth)
     if posting:
+        logger.info(f"cleaning posting...")
         await clean(bot, ctx, sess, auth['id'], 'posting')
     if comment:
         await clean(bot, ctx, sess, auth['id'], 'comment')
