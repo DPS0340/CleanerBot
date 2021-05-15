@@ -10,35 +10,35 @@ services:
     command: --interval 30
   clb2:
     restart: always
-    image: cleanerbot:latest
+    image: a891/cleanerbot:latest
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     environment:
       - CLEANERBOT_TOKEN=${CLEANERBOT_TOKEN2}
   clb3:
     restart: always
-    image: cleanerbot:latest
+    image: a891/cleanerbot:latest
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     environment:
       - CLEANERBOT_TOKEN=${CLEANERBOT_TOKEN3}
   clb4:
     restart: always
-    image: cleanerbot:latest
+    image: a891/cleanerbot:latest
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     environment:
       - CLEANERBOT_TOKEN=${CLEANERBOT_TOKEN4}
   clb5:
     restart: always
-    image: cleanerbot:latest
+    image: a891/cleanerbot:latest
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     environment:
       - CLEANERBOT_TOKEN=${CLEANERBOT_TOKEN5}
   clb6:
     restart: always
-    image: cleanerbot:latest
+    image: a891/cleanerbot:latest
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     environment:
