@@ -2,7 +2,18 @@
 
 빠르고 안전한 디시클리너 디스코드봇
 
-[초대](https://discord.com/api/oauth2/authorize?client_id=788454180837654558&permissions=2048&scope=bot)
+[초대 1](https://discord.com/api/oauth2/authorize?client_id=788454180837654558&permissions=2048&scope=bot)
+
+[초대 2](https://discord.com/api/oauth2/authorize?client_id=842957656453021716&permissions=2048&scope=bot)
+
+[초대 3](https://discord.com/api/oauth2/authorize?client_id=842959282164727840&permissions=2048&scope=bot)
+
+[초대 4](https://discord.com/api/oauth2/authorize?client_id=842959311663530025&permissions=2048&scope=bot)
+
+[초대 5](https://discord.com/api/oauth2/authorize?client_id=842959338166419457&permissions=2048&scope=bot)
+
+[초대 6](https://discord.com/api/oauth2/authorize?client_id=842959375403581450&permissions=2048&scope=bot)
+
 
 ## 클리너 코어 부분
 
