@@ -2,7 +2,7 @@
 version: "3.6"
 services:
   watchtower:
-    container_name: watchtower
+    container_name: cleanerbot-watchtower
     image: containrrr/watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
