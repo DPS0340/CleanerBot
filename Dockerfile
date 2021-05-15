@@ -1,9 +1,11 @@
 FROM python:latest
 
-WORKDIR /CODE
+WORKDIR /code
 
 COPY . .
 
 RUN pip install -r requirements.txt
 
-CMD ["python", "src/main.py"]
+ENV PYTHONPATH /code
+
+CMD ["python", "/code/src/main.py"]
