@@ -56,7 +56,7 @@ async def get_nickname(auth, _type: str = 'posting', _gall_no: str = '0') -> str
     sess = make_session_if_not_exists(auth)
     _id = auth['id']
     gallog_url = f'https://gallog.dcinside.com/{_id}/{_type}'
-    _url = f"{gallog_url}/main?gno={_gall_no}"
+    _url = f"{gallog_url}?gno={_gall_no}"
     res = await sess.get(_url)
     text = await res.text()
     _d = pq(text)
@@ -68,7 +68,7 @@ async def get_num(auth, _type: str = 'posting', _gall_no: str = '0') -> str:
     await login(sess, auth)
     _id = auth['id']
     gallog_url = f'https://gallog.dcinside.com/{_id}/{_type}'
-    _url = f"{gallog_url}/main?gno={_gall_no}"
+    _url = f"{gallog_url}?gno={_gall_no}"
     res = await sess.get(_url)
     text = await res.content.read()
     _d = pq(text)
@@ -116,7 +116,7 @@ async def clean(bot: discord.Client, ctx: commands.Context, sess, _id: str, _typ
         print("Wrong type")
         return
     gallog_url = f'https://gallog.dcinside.com/{_id}/{_type}'
-    _url = f"{gallog_url}/main?gno={_gall_no}"
+    _url = f"{gallog_url}?gno={_gall_no}"
     res = await sess.get(_url)
     text = await res.content.read()
     _d = pq(text)
