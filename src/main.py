@@ -40,6 +40,7 @@ async def help(message):
     embed.add_field(name=f"{prefix}clean", value="글과 댓글을 지웁니다.", inline=False)
     embed.add_field(name=f"{prefix}post", value="글을 지웁니다.", inline=False)
     embed.add_field(name=f"{prefix}comment", value="댓글을 지웁니다.", inline=False)
+    embed.add_field(name=f"{prefix}arca [id] [pw] [nickname]", value="id와 pw, 닉네임을 통해 아카라이브에 있는 글과 댓글을 지웁니다.", inline=False)
     embed.add_field(name=f"Github", value="https://github.com/DPS0340/CleanerBot", inline=False)
 
     await message.channel.send(embed=embed)
@@ -77,6 +78,14 @@ async def post(ctx: commands.Context):
 @bot.command()
 async def comment(ctx: commands.Context):
     await invokeClean(ctx, False, True)
+
+@bot.command()
+async def arca(ctx: commands.Context, id: str, pw: str, nickname: str):
+    message = ctx.message
+    if not (id and pw and nickname):
+        await message.channel.send("잘못된 인자입니다!")
+        return
+    await cleaner.cleanArcaLive(bot, ctx, id, pw, nickname)
 
 @bot.command()
 async def stat(ctx: commands.Context):

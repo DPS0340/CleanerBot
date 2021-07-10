@@ -181,3 +181,55 @@ async def loginAndClean(bot: discord.Client, ctx: commands.Context, auth: dict, 
         await clean(bot, ctx, sess, auth['id'], 'posting')
     if comment:
         await clean(bot, ctx, sess, auth['id'], 'comment')
+
+async def cleanArcaLive(bot: discord.Client, ctx: commands.Context, id: str, pw: str, nickname: str):
+    channel = ctx.message.channel
+
+    s = aiohttp.ClientSession(headers=header)
+
+    await s.get('https://arca.live')
+    loginPage = await s.get('https://arca.live/u/login?goto=/')
+
+    text = await loginPage.content.read()
+    _d = pq(text)
+
+    csrf = _d('input[name$="_csrf"]').val()
+
+    LOGIN_INFO = {
+        "username": id,
+        "password": pw
+    }
+
+    LOGIN_INFO = {'_csrf': csrf, 'goto': '/', **LOGIN_INFO}
+    await s.post('https://arca.live/u/login', data=LOGIN_INFO)
+
+    while True:
+        links = []
+        page = await s.get("https://arca.live/u/@%s" % nickname)
+
+        text = await page.content.read()
+        _d = pq(text)
+
+        for parent in _d('div.col-title').items():
+            child = parent('a').items()
+            for a in child:
+                link = a.attr('href')
+                links.append(link)
+        if not links:
+            break
+        for link in links:
+            try:
+                link = link.replace('?showComments=all', '')
+                if "#c_" in link:
+                    link = link.replace("#c_", "/")
+                link = 'https://arca.live%s/delete' % link
+                deletepage = await s.get(link)
+
+                text = await deletepage.content.read()
+                _d = pq(text)
+                csrf = _d('input[name$="_csrf"]').val()
+                csrfdict = {'_csrf': csrf}
+                await s.post(link, data=csrfdict)
+            except TypeError:
+                continue
+    await channel.send(f"끝났습니다!")
