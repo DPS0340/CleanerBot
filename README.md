@@ -2,6 +2,8 @@
 
 빠르고 안전한 디시클리너 디스코드봇
 
+유용하게 쓰셨다면 **Star**를 눌러 주세요.
+
 [초대 1](https://discord.com/api/oauth2/authorize?client_id=788454180837654558&permissions=2048&scope=bot)
 
 [초대 2](https://discord.com/api/oauth2/authorize?client_id=842957656453021716&permissions=2048&scope=bot)
@@ -35,3 +37,5 @@ id와 pw를 통해 로그인합니다.
 글을 지웁니다.
 ### clb comment
 댓글을 지웁니다.
+### clb arca [id] [pw] [nickname]
+id와 pw, 닉네임을 통해 아카라이브에 있는 글과 댓글을 지웁니다.
