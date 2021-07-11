@@ -12,9 +12,11 @@ token = get_token()
 
 auths = dict()
 
+
 @bot.event
 async def on_ready():
     print('Logged on as {0}!'.format(bot.user))
+
 
 @bot.event
 async def on_message(message):
@@ -31,19 +33,26 @@ async def on_message(message):
         await message.channel.send(f"헬프는 {mention} 멘션")
     await bot.process_commands(message)
 
+
 async def help(message):
     embed = Embed(title="CLEANERBOT 사용 설명서", color=0x95e4fe)
 
-    embed.add_field(name=f"{prefix}login [id] [pw]", value="id와 pw를 통해 로그인합니다.", inline=False)
-    embed.add_field(name="제한 사항", value="이후 커맨드는 로그인된 사용자만 사용 가능합니다.", inline=True)
-    embed.add_field(name=f"{prefix}stat", value="글과 댓글 갯수를 보여줍니다.", inline=False)
+    embed.add_field(
+        name=f"{prefix}login [id] [pw]", value="id와 pw를 통해 로그인합니다.", inline=False)
+    embed.add_field(
+        name="제한 사항", value="이후 커맨드는 로그인된 사용자만 사용 가능합니다.", inline=True)
+    embed.add_field(name=f"{prefix}stat",
+                    value="글과 댓글 갯수를 보여줍니다.", inline=False)
     embed.add_field(name=f"{prefix}clean", value="글과 댓글을 지웁니다.", inline=False)
     embed.add_field(name=f"{prefix}post", value="글을 지웁니다.", inline=False)
     embed.add_field(name=f"{prefix}comment", value="댓글을 지웁니다.", inline=False)
-    embed.add_field(name=f"{prefix}arca [id] [pw] [nickname]", value="id와 pw, 닉네임을 통해 아카라이브에 있는 글과 댓글을 지웁니다.", inline=False)
-    embed.add_field(name=f"Github", value="https://github.com/DPS0340/CleanerBot", inline=False)
+    embed.add_field(name=f"{prefix}arca [id] [pw] [nickname]",
+                    value="id와 pw, 닉네임을 통해 아카라이브에 있는 글과 댓글을 지웁니다.", inline=False)
+    embed.add_field(
+        name=f"Github", value="https://github.com/DPS0340/CleanerBot", inline=False)
 
     await message.channel.send(embed=embed)
+
 
 @bot.command()
 async def login(ctx: commands.Context, id, pw):
@@ -53,6 +62,7 @@ async def login(ctx: commands.Context, id, pw):
         return
     auths[ctx.author.id] = {'id': id, 'pw': pw}
     await message.channel.send("로그인이 완료되었습니다!")
+
 
 async def invokeClean(ctx: commands.Context, posting=True, comment=True):
     message = ctx.message
@@ -64,20 +74,25 @@ async def invokeClean(ctx: commands.Context, posting=True, comment=True):
     auth = auths[uid]
     await cleanMatchArg(ctx, auth, posting, comment)
 
+
 async def cleanMatchArg(ctx: commands.Context, auth, posting=True, comment=True):
     await cleaner.loginAndClean(bot, ctx, auth, posting, comment)
+
 
 @bot.command()
 async def clean(ctx: commands.Context):
     await invokeClean(ctx, True, True)
 
+
 @bot.command()
 async def post(ctx: commands.Context):
     await invokeClean(ctx, True, False)
 
+
 @bot.command()
 async def comment(ctx: commands.Context):
     await invokeClean(ctx, False, True)
+
 
 @bot.command()
 async def arca(ctx: commands.Context, id: str, pw: str, nickname: str):
@@ -86,6 +101,7 @@ async def arca(ctx: commands.Context, id: str, pw: str, nickname: str):
         await message.channel.send("잘못된 인자입니다!")
         return
     await cleaner.cleanArcaLive(bot, ctx, id, pw, nickname)
+
 
 @bot.command()
 async def stat(ctx: commands.Context):
@@ -100,8 +116,10 @@ async def stat(ctx: commands.Context):
     commentNum = await cleaner.get_num(auth, _type='comment')
     await message.channel.send(f"사용자 {nickname}: 글 {postNum}개 댓글 {commentNum}개")
 
+
 def matchPrefix(message):
     return message.content.startswith(prefix)
+
 
 def isDM(message):
     return not message.guild

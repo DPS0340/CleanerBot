@@ -12,7 +12,9 @@ from log import logger
 from discord.ext import commands
 
 sessions = dict()
-header = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36'}
+header = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36'}
+
 
 def make_session_if_not_exists(auth: dict) -> aiohttp.ClientSession:
     global sessions
@@ -23,13 +25,13 @@ def make_session_if_not_exists(auth: dict) -> aiohttp.ClientSession:
     sessions[id] = sess
     return sess
 
+
 def set_session(sess: aiohttp.ClientSession, id: int) -> None:
     global sessions
     sessions[id] = sess
 
 
-
-def decode_service_code(_svc : str, _r : str) -> str:
+def decode_service_code(_svc: str, _r: str) -> str:
     _r_key = 'yL/M=zNa0bcPQdReSfTgUhViWjXkYIZmnpo+qArOBs1Ct2D3uE4Fv5G6wHl78xJ9K'
     _r = re.sub('[^A-Za-z0-9+/=]', '', _r)
 
@@ -52,6 +54,7 @@ def decode_service_code(_svc : str, _r : str) -> str:
         t += chr(int(2 * (_r[i] - i - 1) / (13 - i - 1)))
     return _svc[0:len(_svc) - 10] + t
 
+
 async def get_nickname(auth, _type: str = 'posting', _gall_no: str = '0') -> str:
     sess = make_session_if_not_exists(auth)
     _id = auth['id']
@@ -62,6 +65,7 @@ async def get_nickname(auth, _type: str = 'posting', _gall_no: str = '0') -> str
     _d = pq(text)
     found = _d('.nick_name').text()
     return found
+
 
 async def get_num(auth, _type: str = 'posting', _gall_no: str = '0') -> str:
     sess = make_session_if_not_exists(auth)
@@ -131,7 +135,8 @@ async def clean(bot: discord.Client, ctx: commands.Context, sess, _id: str, _typ
         cookies = res.cookies
         text = await res.content.read()
         _d = pq(text)
-        _r = _d('script[type="text/javascript"]').filter(lambda _, e: 'var _r =' in pq(e).text()).text()
+        _r = _d('script[type="text/javascript"]').filter(lambda _,
+                                                         e: 'var _r =' in pq(e).text()).text()
         _r = _r[13:_r.find("');")]
         time.sleep(1)
         for _li in _d('ul.cont_listbox > li').items():
@@ -162,14 +167,16 @@ async def clean(bot: discord.Client, ctx: commands.Context, sess, _id: str, _typ
 캡챠를 푸신 다음, 이모지를 클릭 해주세요.""")
                 await ask.add_reaction('🆗')
                 logger.info(f"Reaction clicked")
+
                 def check(reaction, user):
-                    return reaction.message == ask and user == ctx.author and str(reaction.emoji) ==  '🆗'
-                
+                    return reaction.message == ask and user == ctx.author and str(reaction.emoji) == '🆗'
+
                 try:
                     await bot.wait_for('reaction_add', check=check, timeout=300)
                 except TimeoutError:
                     return
                 await channel.send("해제 완료!")
+
 
 async def loginAndClean(bot: discord.Client, ctx: commands.Context, auth: dict, posting: bool = True, comment: bool = True):
     logger.info(f"author: {ctx.author}")
@@ -181,6 +188,7 @@ async def loginAndClean(bot: discord.Client, ctx: commands.Context, auth: dict, 
         await clean(bot, ctx, sess, auth['id'], 'posting')
     if comment:
         await clean(bot, ctx, sess, auth['id'], 'comment')
+
 
 async def cleanArcaLive(bot: discord.Client, ctx: commands.Context, id: str, pw: str, nickname: str):
     channel = ctx.message.channel
@@ -217,6 +225,7 @@ async def cleanArcaLive(bot: discord.Client, ctx: commands.Context, id: str, pw:
                 links.append(link)
         if not links:
             break
+        escape = False
         for link in links:
             try:
                 link = link.replace('?showComments=all', '')
@@ -229,7 +238,11 @@ async def cleanArcaLive(bot: discord.Client, ctx: commands.Context, id: str, pw:
                 _d = pq(text)
                 csrf = _d('input[name$="_csrf"]').val()
                 csrfdict = {'_csrf': csrf}
-                await s.post(link, data=csrfdict)
+                res = await s.post(link, data=csrfdict)
+                if not (res.status == 200 or res.status == 302):
+                    await channel.send("삭제에 필요한 포인트가 부족합니다!")
+                    await channel.send("삭제를 종료합니다.")
+                    return
             except TypeError:
                 continue
-    await channel.send(f"끝났습니다!")
+    await channel.send("삭제 완료!")
