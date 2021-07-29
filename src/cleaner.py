@@ -144,7 +144,7 @@ async def clean(bot: discord.Client, ctx: commands.Context, sess, _id: str, _typ
             _data = {
                 'ci_t': cookies.get('ci_c'),
                 'no': no,
-                'service_code': decode_service_code(_d('input[name="service_code"]').val(), _r)
+                'service_code': 'undefined' # 갤로그 개편 fix
             }
             new_header = {
                 **header,
