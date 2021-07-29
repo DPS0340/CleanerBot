@@ -8,6 +8,13 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/docker:/etc/docker
     command: --interval 30
+  clb1:
+    restart: always
+    image: a891/cleanerbot:latest
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    environment:
+      - CLEANERBOT_TOKEN=${CLEANERBOT_TOKEN1}
   clb2:
     restart: always
     image: a891/cleanerbot:latest
