@@ -1,0 +1,6 @@
+version: "3.9"
+services:
+    clb:
+        build: ..
+        environment:
+            - CLEANERBOT_TOKEN=${CLEANERBOT_TOKEN}
