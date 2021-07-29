@@ -124,7 +124,7 @@ async def clean(bot: discord.Client, ctx: commands.Context, sess, _id: str, _typ
     res = await sess.get(_url)
     text = await res.content.read()
     _d = pq(text)
-    _last = _d('.cont_head.clear > .choice_sect > button > .num').text()
+    _last = _d('.cont_head.clear > .choice_sect > button.on > .num').text()
     _last = math.ceil(int(_last[1:-1].replace(',', '')) / 20)
     print(_last, 'pages')
     time.sleep(1)
