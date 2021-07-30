@@ -3,13 +3,16 @@
 import time
 import re
 import math
+
+from asyncio import ensure_future
 import aiohttp
-from aiohttp.client import request
 import discord
 from pyquery import PyQuery as pq
 import json
 from log import logger
 from discord.ext import commands
+from pyppeteer import launch
+from urllib.parse import quote
 
 sessions = dict()
 header = {
@@ -113,7 +116,63 @@ async def login(sess: aiohttp.ClientSession, auth: dict) -> aiohttp.ClientSessio
     return sess
 
 
-async def clean(bot: discord.Client, ctx: commands.Context, sess, _id: str, _type: str = 'posting', _gall_no: str = '0'):
+async def get_captcha_token(cookies: dict, _g_url: str, id: str, pw: str) -> str:
+    browser = await launch({'headless': False, 'args': ['--disable-web-security', '--disable-features=IsolateOrigins,site-per-process']})
+    page = await browser.newPage()
+    page.setCookie(*cookies)
+
+    escaped_url = quote(_g_url)
+
+    _url = f'https://dcid.dcinside.com/join/login.php?s_url={escaped_url}'
+    await page.goto(_url)
+
+    id_selector = '.int.id.bg'
+    pw_selector = '.int.pw.bg'
+
+    await page.waitForSelector(id_selector)
+    await page.waitForSelector(pw_selector)
+
+    id_input = await page.querySelector(id_selector)
+    pw_input = await page.querySelector(pw_selector)
+
+    await id_input.click()
+    await id_input.type(id)
+    await pw_input.click()
+    await pw_input.type(pw)
+
+    login_input = await page.querySelector('.btn_blue.small.btn_wfull')
+
+    await login_input.click()
+    await page.waitForSelector('body')
+    await page.evaluate(f"document.location.href='{_g_url}'", force_expr=True)
+
+    async def accept_dialog(dialog):
+        await dialog.accept()
+    
+    page.on(
+        'dialog',
+        lambda dialog: ensure_future(accept_dialog(dialog))
+    )
+    
+
+    button_selector = '.btn_delete.btn_listdel'
+    await page.waitForSelector(button_selector)
+    button = await page.querySelector(button_selector)
+    await button.click()
+
+    iframe_selector = '.captcha_wrapper > div > div > iframe'
+
+    await page.waitForSelector(iframe_selector)
+    iframe_dom = await page.querySelector(iframe_selector)
+    iframe = await iframe_dom.contentFrame()
+    
+    captcha_token = await iframe.evaluate("document.getElementById('recaptcha-token').value", force_expr=True)
+
+    await browser.close()
+
+    return captcha_token
+
+async def clean(bot: discord.Client, ctx: commands.Context, sess, _id: str, _pw: str, _type: str = 'posting', _gall_no: str = '0'):
     channel = ctx.message.channel
 
     if _type not in ['posting', 'comment']:
@@ -128,6 +187,8 @@ async def clean(bot: discord.Client, ctx: commands.Context, sess, _id: str, _typ
     _last = math.ceil(int(_last[1:-1].replace(',', '')) / 20)
     print(_last, 'pages')
     time.sleep(1)
+
+    captcha_token = ''
 
     for _page in range(_last, 0, -1):
         _p_url = f"{_url}&p={str(_page)}"
@@ -162,19 +223,12 @@ async def clean(bot: discord.Client, ctx: commands.Context, sess, _id: str, _typ
             print(f"{no}: {_r_delete}")
             if _r_delete['result'] in ['captcha', 'fail']:
                 logger.info(f"Captcha generated")
-                ask = await channel.send(f"""캡챠 발생!
-{gallog_url} 주소로 가서 삭제를 클릭 후 캡챠를 풀어주세요.
-캡챠를 푸신 다음, 이모지를 클릭 해주세요.""")
-                await ask.add_reaction('🆗')
-                logger.info(f"Reaction clicked")
+                if not captcha_token:
+                    captcha_token = await get_captcha_token(cookies, _url, _id, _pw)
+                _data['g-recaptcha-response'] = captcha_token
+                res = await sess.post(url, data=_data, headers=new_header)
+                logger.info(f"Captcha solved")
 
-                def check(reaction, user):
-                    return reaction.message == ask and user == ctx.author and str(reaction.emoji) == '🆗'
-
-                try:
-                    await bot.wait_for('reaction_add', check=check, timeout=300)
-                except TimeoutError:
-                    return
                 await channel.send("해제 완료!")
 
 
@@ -185,9 +239,10 @@ async def loginAndClean(bot: discord.Client, ctx: commands.Context, auth: dict, 
     sess = await login(None, auth)
     if posting:
         logger.info(f"cleaning posting...")
-        await clean(bot, ctx, sess, auth['id'], 'posting')
+        await clean(bot, ctx, sess, auth['id'], auth['pw'], 'posting')
     if comment:
-        await clean(bot, ctx, sess, auth['id'], 'comment')
+        logger.info(f"cleaning comment...")
+        await clean(bot, ctx, sess, auth['id'], auth['pw'], 'comment')
 
 
 async def cleanArcaLive(bot: discord.Client, ctx: commands.Context, id: str, pw: str, nickname: str):
