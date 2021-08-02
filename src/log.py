@@ -3,7 +3,7 @@ import sys
 
 logging.basicConfig(    
     stream=sys.stdout,
-    level=logging.DEBUG,
+    level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
 
