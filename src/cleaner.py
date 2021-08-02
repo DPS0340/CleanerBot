@@ -190,7 +190,7 @@ async def loginAndClean(bot: discord.Client, ctx: commands.Context, auth: dict, 
         await clean(bot, ctx, sess, auth['id'], 'comment')
 
 
-async def cleanArcaLive(bot: discord.Client, ctx: commands.Context, id: str, pw: str, nickname: str):
+async def cleanArcaLive(bot: discord.Client, ctx: commands.Context, id: str, pw: str, nickname: str, posting: bool = True, comment: bool = True):
     channel = ctx.message.channel
 
     s = aiohttp.ClientSession(headers=header)
@@ -211,6 +211,11 @@ async def cleanArcaLive(bot: discord.Client, ctx: commands.Context, id: str, pw:
     LOGIN_INFO = {'_csrf': csrf, 'goto': '/', **LOGIN_INFO}
     await s.post('https://arca.live/u/login', data=LOGIN_INFO)
 
+    # 글 삭제 시작 인덱스
+    # 0부터 시작해서 삭제되지 않는 글이 있을경우 1씩 증가함
+    # 인덱스 전의 삭제 가능한 글들은 삭제되었음을 암시적으로 의미함
+    idx = 0
+
     while True:
         links = []
         page = await s.get("https://arca.live/u/@%s" % nickname)
@@ -219,30 +224,42 @@ async def cleanArcaLive(bot: discord.Client, ctx: commands.Context, id: str, pw:
         _d = pq(text)
 
         for parent in _d('div.col-title').items():
+            parent.items()
             child = parent('a').items()
             for a in child:
                 link = a.attr('href')
                 links.append(link)
-        if not links:
+        if not posting:
+            links = list(filter(lambda x: '#c_' in x, links))
+        if not comment:
+            links = list(filter(lambda x: '#c_' not in x, links))
+        if not links or len(links) <= idx:
             break
-        escape = False
-        for link in links:
+
+        for i in range(idx, len(links)):
             try:
+                link = links[i]
                 link = link.replace('?showComments=all', '')
                 if "#c_" in link:
                     link = link.replace("#c_", "/")
                 link = 'https://arca.live%s/delete' % link
-                deletepage = await s.get(link)
+                delete_page = await s.get(link)
 
-                text = await deletepage.content.read()
+                text = await delete_page.content.read()
                 _d = pq(text)
                 csrf = _d('input[name$="_csrf"]').val()
                 csrfdict = {'_csrf': csrf}
                 res = await s.post(link, data=csrfdict)
-                if not (res.status == 200 or res.status == 302):
+                if res.status == 429:
                     await channel.send("삭제에 필요한 포인트가 부족합니다!")
                     await channel.send("삭제를 종료합니다.")
                     return
+                elif not (res.status == 200 or res.status == 302):
+                    # 삭제할 수 없는 글일시
+                    # 삭제 인덱스 + 1 후 refresh
+                    idx += 1
+                    break
             except TypeError:
                 continue
+
     await channel.send("삭제 완료!")
