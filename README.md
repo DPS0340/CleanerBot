@@ -25,7 +25,7 @@
 
 ## CLEANERBOT 사용 설명서
 
-### clb login [id] [pw]
+### clb login id pw
 id와 pw를 통해 로그인합니다.
 ### 제한 사항
 이후 커맨드는 로그인된 사용자만 사용 가능합니다.
@@ -37,5 +37,9 @@ id와 pw를 통해 로그인합니다.
 글을 지웁니다.
 ### clb comment
 댓글을 지웁니다.
-### clb arca [id] [pw] [nickname]
+### clb arca id pw nickname
 id와 pw, 닉네임을 통해 아카라이브에 있는 글과 댓글을 지웁니다.
+### clb arca post id pw nickname
+id와 pw, 닉네임을 통해 아카라이브에 있는 글을 지웁니다.
+### clb arca comment id pw nickname
+id와 pw, 닉네임을 통해 아카라이브에 있는 댓글을 지웁니다.
