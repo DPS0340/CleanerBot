@@ -38,7 +38,7 @@ async def help(message):
     embed = Embed(title="CLEANERBOT 사용 설명서", color=0x95e4fe)
 
     embed.add_field(
-        name=f"{prefix}login [id] [pw]", value="id와 pw를 통해 로그인합니다.", inline=False)
+        name=f"{prefix}login id pw", value="id와 pw를 통해 로그인합니다.", inline=False)
     embed.add_field(
         name="제한 사항", value="이후 커맨드는 로그인된 사용자만 사용 가능합니다.", inline=True)
     embed.add_field(name=f"{prefix}stat",
@@ -46,8 +46,12 @@ async def help(message):
     embed.add_field(name=f"{prefix}clean", value="글과 댓글을 지웁니다.", inline=False)
     embed.add_field(name=f"{prefix}post", value="글을 지웁니다.", inline=False)
     embed.add_field(name=f"{prefix}comment", value="댓글을 지웁니다.", inline=False)
-    embed.add_field(name=f"{prefix}arca [id] [pw] [nickname]",
+    embed.add_field(name=f"{prefix}arca id pw nickname",
                     value="id와 pw, 닉네임을 통해 아카라이브에 있는 글과 댓글을 지웁니다.", inline=False)
+    embed.add_field(name=f"{prefix}arca post id pw nickname",
+                    value="id와 pw, 닉네임을 통해 아카라이브에 있는 글을 지웁니다.", inline=False)
+    embed.add_field(name=f"{prefix}arca comment id pw nickname",
+                    value="id와 pw, 닉네임을 통해 아카라이브에 있는 댓글을 지웁니다.", inline=False)
     embed.add_field(
         name=f"Github", value="https://github.com/DPS0340/CleanerBot", inline=False)
 
@@ -95,12 +99,26 @@ async def comment(ctx: commands.Context):
 
 
 @bot.command()
-async def arca(ctx: commands.Context, id: str, pw: str, nickname: str):
+async def arca(ctx: commands.Context, *args):
     message = ctx.message
-    if not (id and pw and nickname):
+    if len(args) == 3:
+        id, pw, nickname = args
+        flag = ''
+    elif len(args) == 4:
+        flag, id, pw, nickname = args
+    else:
         await message.channel.send("잘못된 인자입니다!")
         return
-    await cleaner.cleanArcaLive(bot, ctx, id, pw, nickname)
+    posting = True
+    comment = True
+    if flag == 'post':
+        comment = False
+    elif flag == 'comment':
+        posting = False
+    elif flag != '':
+        await message.channel.send("잘못된 인자입니다!")
+        return
+    await cleaner.cleanArcaLive(bot, ctx, id, pw, nickname, posting, comment)
 
 
 @bot.command()

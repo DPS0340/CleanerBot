@@ -190,7 +190,7 @@ async def loginAndClean(bot: discord.Client, ctx: commands.Context, auth: dict, 
         await clean(bot, ctx, sess, auth['id'], 'comment')
 
 
-async def cleanArcaLive(bot: discord.Client, ctx: commands.Context, id: str, pw: str, nickname: str):
+async def cleanArcaLive(bot: discord.Client, ctx: commands.Context, id: str, pw: str, nickname: str, posting: bool = True, comment: bool = True):
     channel = ctx.message.channel
 
     s = aiohttp.ClientSession(headers=header)
@@ -224,10 +224,15 @@ async def cleanArcaLive(bot: discord.Client, ctx: commands.Context, id: str, pw:
         _d = pq(text)
 
         for parent in _d('div.col-title').items():
+            parent.items()
             child = parent('a').items()
             for a in child:
                 link = a.attr('href')
                 links.append(link)
+        if not posting:
+            links = list(filter(lambda x: '#c_' in x, links))
+        if not comment:
+            links = list(filter(lambda x: '#c_' not in x, links))
         if not links or len(links) <= idx:
             break
 
