@@ -1,6 +1,6 @@
 def get_ip_address():
-    from requests import get
-    return get('https://ipapi.co/ip/').text
+    import requests
+    return requests.get('https://checkip.amazonaws.com').text.strip()
 
 ip_address = get_ip_address()
 webserver_port = 8087
