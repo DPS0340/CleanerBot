@@ -11,6 +11,7 @@ from pyquery import PyQuery as pq
 import json
 from log import logger
 from discord.ext import commands
+import random
 
 sessions = dict()
 header = {
@@ -151,7 +152,7 @@ async def clean(bot: discord.Client, ctx: commands.Context, sess, _id: str, _typ
                 'Referer': _p_url,
                 'X-Requested-With': 'XMLHttpRequest'
             }
-            time.sleep(1)
+            time.sleep(random.uniform(0.8, 2.2))
             url = f'https://gallog.dcinside.com/{_id}/ajax/log_list_ajax/delete'
             res = await sess.post(url, data=_data, headers=new_header)
             text = await res.read()
@@ -246,11 +247,25 @@ async def cleanArcaLive(bot: discord.Client, ctx: commands.Context, id: str, pw:
                 _d = pq(text)
                 csrf = _d('input[name$="_csrf"]').val()
                 csrfdict = {'_csrf': csrf}
+                time.sleep(random.uniform(0.8, 2.2)) # 캡챠 방지용
                 res = await s.post(link, data=csrfdict)
                 if res.status == 429:
-                    await channel.send("삭제에 필요한 포인트가 부족합니다!")
-                    await channel.send("삭제를 종료합니다.")
-                    return
+                    logger.info(f"Captcha generated")
+                    ask: discord.Message = await channel.send(f"""캡챠 발생!
+{link} 주소로 가서 삭제를 클릭 후 캡챠를 풀어주세요.
+캡챠를 푸신 다음, 이모지를 클릭 해주세요.""")
+                    await ask.add_reaction('🆗')
+                    def check(payload: discord.RawReactionActionEvent):
+                        return payload.message_id == ask.id and payload.user_id == ctx.author.id and str(payload.emoji) == '🆗'
+
+                    try:
+                        await bot.wait_for('raw_reaction_add', check=check, timeout=300.0)
+                    except asyncio.TimeoutError:
+                        logger.info("Timeout")
+                        return
+                    logger.info(f"Reaction clicked")
+                    await channel.send("해제 완료!")
+                    res = await s.post(link, data=csrfdict)
                 elif not (res.status == 200 or res.status == 302):
                     # 삭제할 수 없는 글일시
                     # 삭제 인덱스 + 1 후 refresh
