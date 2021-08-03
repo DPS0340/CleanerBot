@@ -1,10 +1,13 @@
 import asyncio
+import logging
 from discord.ext import commands
 from discord import Embed
 import discord
+from server import Webserver
 import cleaner
 from cleanerbot_token import get_token
 from log import logger
+from constants import ip_address
 
 
 prefix = "clb "
@@ -13,9 +16,9 @@ token = get_token()
 
 auths = dict()
 
-
 @bot.event
 async def on_ready():
+    logging.info(f"bot ip address: {ip_address}")
     print('Logged on as {0}!'.format(bot.user))
 
 
@@ -144,4 +147,6 @@ def isDM(message):
     return not message.guild
 
 
-bot.run(token)
+if __name__ == '__main__':
+    bot.add_cog(Webserver(bot))
+    bot.run(token)

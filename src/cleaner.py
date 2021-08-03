@@ -11,6 +11,7 @@ from pyquery import PyQuery as pq
 import json
 from log import logger
 from discord.ext import commands
+from constants import ip_address, webserver_port
 import random
 
 sessions = dict()
@@ -240,7 +241,9 @@ async def cleanArcaLive(bot: discord.Client, ctx: commands.Context, id: str, pw:
                 link = link.replace('?showComments=all', '')
                 if "#c_" in link:
                     link = link.replace("#c_", "/")
-                link = 'https://arca.live%s/delete' % link
+                original_link = link
+                link = f'https://arca.live{link}/delete'
+                proxy_link = f'http://{ip_address}:{webserver_port}{original_link}/delete'
                 delete_page = await s.get(link)
 
                 text = await delete_page.content.read()
@@ -252,7 +255,7 @@ async def cleanArcaLive(bot: discord.Client, ctx: commands.Context, id: str, pw:
                 if res.status == 429:
                     logger.info(f"Captcha generated")
                     ask: discord.Message = await channel.send(f"""캡챠 발생!
-{link} 주소로 가서 삭제를 클릭 후 캡챠를 풀어주세요.
+{proxy_link} 주소로 가셔서 로그인 후 삭제를 클릭 후 캡챠를 풀어주세요.
 캡챠를 푸신 다음, 이모지를 클릭 해주세요.""")
                     await ask.add_reaction('🆗')
                     def check(payload: discord.RawReactionActionEvent):

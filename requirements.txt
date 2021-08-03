@@ -9,3 +9,5 @@ discord.py == 1.7.3
 
 # C:\Users\DPS0340\Programming\cleanerbot\src\cleaner.py: 9
 pyquery == 1.4.3
+
+brotlipy == 0.7.0
