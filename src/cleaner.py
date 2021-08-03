@@ -1,5 +1,6 @@
 # https://gist.github.com/74l35rUnn3r/f689bce5b6abb15d0185a4754e4e6da5 소스를 기반으로 여러가지 수정
 
+import asyncio
 import time
 import re
 import math
@@ -135,10 +136,6 @@ async def clean(bot: discord.Client, ctx: commands.Context, sess, _id: str, _typ
         cookies = res.cookies
         text = await res.content.read()
         _d = pq(text)
-        _r = _d('script[type="text/javascript"]').filter(lambda _,
-                                                         e: 'var _r =' in pq(e).text()).text()
-        _r = _r[13:_r.find("');")]
-        time.sleep(1)
         for _li in _d('ul.cont_listbox > li').items():
             no = _li.attr('data-no')
             _data = {
@@ -162,19 +159,19 @@ async def clean(bot: discord.Client, ctx: commands.Context, sess, _id: str, _typ
             print(f"{no}: {_r_delete}")
             if _r_delete['result'] in ['captcha', 'fail']:
                 logger.info(f"Captcha generated")
-                ask = await channel.send(f"""캡챠 발생!
+                ask: discord.Message = await channel.send(f"""캡챠 발생!
 {gallog_url} 주소로 가서 삭제를 클릭 후 캡챠를 풀어주세요.
 캡챠를 푸신 다음, 이모지를 클릭 해주세요.""")
                 await ask.add_reaction('🆗')
-                logger.info(f"Reaction clicked")
-
-                def check(reaction, user):
-                    return reaction.message == ask and user == ctx.author and str(reaction.emoji) == '🆗'
+                def check(payload: discord.RawReactionActionEvent):
+                    return payload.message_id == ask.id and payload.user_id == ctx.author.id and str(payload.emoji) == '🆗'
 
                 try:
-                    await bot.wait_for('reaction_add', check=check, timeout=300)
-                except TimeoutError:
+                    await bot.wait_for('raw_reaction_add', check=check, timeout=300.0)
+                except asyncio.TimeoutError:
+                    logger.info("Timeout")
                     return
+                logger.info(f"Reaction clicked")
                 await channel.send("해제 완료!")
 
 

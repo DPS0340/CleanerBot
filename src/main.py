@@ -1,6 +1,7 @@
 import asyncio
 from discord.ext import commands
 from discord import Embed
+import discord
 import cleaner
 from cleanerbot_token import get_token
 from log import logger
