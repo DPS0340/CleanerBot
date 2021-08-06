@@ -4,7 +4,7 @@
 
 유용하게 쓰셨다면 **Star**를 눌러 주세요.
 
-[공식 디스코드 서버](https://discord.gg/VJ22wCqwKm) (사용 권장)
+[공식 디스코드 서버](https://discord.gg/qYVBxnyAxa) (사용 권장)
 
 [초대 1](https://discord.com/api/oauth2/authorize?client_id=788454180837654558&permissions=2048&scope=bot)
 
