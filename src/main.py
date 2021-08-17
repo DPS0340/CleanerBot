@@ -3,7 +3,7 @@ import logging
 from discord.ext import commands
 from discord import Embed
 import discord
-from server import Webserver
+from server import ArcaProxyServer, GallogProxyServer, LoginProxyServer
 import cleaner
 from cleanerbot_token import get_token
 from log import logger
@@ -148,5 +148,7 @@ def isDM(message):
 
 
 if __name__ == '__main__':
-    bot.add_cog(Webserver(bot))
+    bot.add_cog(ArcaProxyServer(bot))
+    bot.add_cog(GallogProxyServer(bot))
+    bot.add_cog(LoginProxyServer(bot))
     bot.run(token)

@@ -11,7 +11,7 @@ from pyquery import PyQuery as pq
 import json
 from log import logger
 from discord.ext import commands
-from constants import ip_address, webserver_port
+from constants import ip_address, arca_proxy_port, dcinside_proxy_url
 import random
 
 sessions = dict()
@@ -34,29 +34,25 @@ def set_session(sess: aiohttp.ClientSession, id: int) -> None:
     sessions[id] = sess
 
 
-def decode_service_code(_svc: str, _r: str) -> str:
-    _r_key = 'yL/M=zNa0bcPQdReSfTgUhViWjXkYIZmnpo+qArOBs1Ct2D3uE4Fv5G6wHl78xJ9K'
-    _r = re.sub('[^A-Za-z0-9+/=]', '', _r)
+async def captcha_response(bot: commands.Bot, ctx: commands.context, link: str):
+    channel = ctx.message.channel
 
-    tmp = ''
-    i = 0
-    for a in [_r[i * 4:(i + 1) * 4] for i in range((len(_r) + 3) // 4)]:
-        t, f, d, h = [_r_key.find(x) for x in a]
-        tmp += chr(t << 2 | f >> 4)
-        if d != 64:
-            tmp += chr((15 & f) << 4 | (d >> 2))
-        if h != 64:
-            tmp += chr((3 & d) << 6 | h)
-    _r = str(int(tmp[0]) + 4) + tmp[1:]
-    if int(tmp[0]) > 5:
-        _r = str(int(tmp[0]) - 5) + tmp[1:]
+    logger.info(f"Captcha generated")
+    ask: discord.Message = await channel.send(f"""캡챠 발생!
+{link} 주소로 가셔서 로그인 후 삭제를 클릭 후 캡챠를 풀어주세요.
+캡챠를 푸신 다음, 이모지를 클릭 해주세요.""")
+    await ask.add_reaction('🆗')
+    def check(payload: discord.RawReactionActionEvent):
+        return payload.message_id == ask.id and payload.user_id == ctx.author.id and str(payload.emoji) == '🆗'
 
-    _r = [float(x) for x in _r.split(',')]
-    t = ''
-    for i in range(len(_r)):
-        t += chr(int(2 * (_r[i] - i - 1) / (13 - i - 1)))
-    return _svc[0:len(_svc) - 10] + t
-
+    try:
+        await bot.wait_for('raw_reaction_add', check=check, timeout=300.0)
+    except asyncio.TimeoutError:
+        logger.info("Timeout")
+        return False
+    logger.info(f"Reaction clicked")
+    await channel.send("해제 완료!")
+    return True
 
 async def get_nickname(auth, _type: str = 'posting', _gall_no: str = '0') -> str:
     sess = make_session_if_not_exists(auth)
@@ -117,8 +113,6 @@ async def login(sess: aiohttp.ClientSession, auth: dict) -> aiohttp.ClientSessio
 
 
 async def clean(bot: discord.Client, ctx: commands.Context, sess, _id: str, _type: str = 'posting', _gall_no: str = '0'):
-    channel = ctx.message.channel
-
     if _type not in ['posting', 'comment']:
         print("Wrong type")
         return
@@ -160,21 +154,10 @@ async def clean(bot: discord.Client, ctx: commands.Context, sess, _id: str, _typ
             _r_delete = json.loads(text)
             print(f"{no}: {_r_delete}")
             if _r_delete['result'] in ['captcha', 'fail']:
-                logger.info(f"Captcha generated")
-                ask: discord.Message = await channel.send(f"""캡챠 발생!
-{gallog_url} 주소로 가서 삭제를 클릭 후 캡챠를 풀어주세요.
-캡챠를 푸신 다음, 이모지를 클릭 해주세요.""")
-                await ask.add_reaction('🆗')
-                def check(payload: discord.RawReactionActionEvent):
-                    return payload.message_id == ask.id and payload.user_id == ctx.author.id and str(payload.emoji) == '🆗'
-
-                try:
-                    await bot.wait_for('raw_reaction_add', check=check, timeout=300.0)
-                except asyncio.TimeoutError:
-                    logger.info("Timeout")
+                proxy_url = f"{dcinside_proxy_url}/{_id}/{_type}"
+                captcha_status = await captcha_response(bot, ctx, proxy_url)
+                if captcha_status == False:
                     return
-                logger.info(f"Reaction clicked")
-                await channel.send("해제 완료!")
 
 
 async def loginAndClean(bot: discord.Client, ctx: commands.Context, auth: dict, posting: bool = True, comment: bool = True):
@@ -243,9 +226,12 @@ async def cleanArcaLive(bot: discord.Client, ctx: commands.Context, id: str, pw:
                     link = link.replace("#c_", "/")
                 original_link = link
                 link = f'https://arca.live{link}/delete'
-                proxy_link = f'http://{ip_address}:{webserver_port}{original_link}/delete'
+                proxy_link = f'http://{ip_address}:{arca_proxy_port}{original_link}/delete'
                 delete_page = await s.get(link)
 
+                captcha_status = await captcha_response(bot, ctx, proxy_link)
+                if captcha_status == False:
+                    return
                 text = await delete_page.content.read()
                 _d = pq(text)
                 csrf = _d('input[name$="_csrf"]').val()
@@ -253,21 +239,7 @@ async def cleanArcaLive(bot: discord.Client, ctx: commands.Context, id: str, pw:
                 time.sleep(random.uniform(0.8, 2.2)) # 캡챠 방지용
                 res = await s.post(link, data=csrfdict)
                 if res.status == 429:
-                    logger.info(f"Captcha generated")
-                    ask: discord.Message = await channel.send(f"""캡챠 발생!
-{proxy_link} 주소로 가셔서 로그인 후 삭제를 클릭 후 캡챠를 풀어주세요.
-캡챠를 푸신 다음, 이모지를 클릭 해주세요.""")
-                    await ask.add_reaction('🆗')
-                    def check(payload: discord.RawReactionActionEvent):
-                        return payload.message_id == ask.id and payload.user_id == ctx.author.id and str(payload.emoji) == '🆗'
 
-                    try:
-                        await bot.wait_for('raw_reaction_add', check=check, timeout=300.0)
-                    except asyncio.TimeoutError:
-                        logger.info("Timeout")
-                        return
-                    logger.info(f"Reaction clicked")
-                    await channel.send("해제 완료!")
                     res = await s.post(link, data=csrfdict)
                 elif not (res.status == 200 or res.status == 302):
                     # 삭제할 수 없는 글일시

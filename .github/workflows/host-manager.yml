@@ -1,0 +1,38 @@
+name: Compile host-manager
+
+on:
+  push:
+    tags:
+    - 'v*'
+
+jobs:
+  compile-host-manager:
+    runs-on: ubuntu-20.04
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Setup Deno
+        uses: denoland/setup-deno@v1.1.0
+        with:
+          deno-version: vx.x.x
+      -
+        name: Compile linux
+        run: deno compile --output host-manager-linux-x86_64 --target x86_64-unknown-linux-gnu --unstable --allow-read --allow-write --allow-net ./host-manager/index.ts
+      -
+        name: Compile Windows
+        run: deno compile --output host-manager-windows-x86_64 --target x86_64-pc-windows-msvc --unstable --allow-read --allow-write --allow-net ./host-manager/index.ts
+      -
+        name: Compile Apple Darwin
+        run: deno compile --output host-manager-darwin-x86_64 --target x86_64-apple-darwin --unstable --allow-read --allow-write --allow-net ./host-manager/index.ts
+      - 
+        name: Release to Github
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            host-manager-linux-x86_64
+            host-manager-windows-x86_64.exe
+            host-manager-darwin-x86_64
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

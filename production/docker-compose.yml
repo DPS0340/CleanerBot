@@ -6,3 +6,4 @@ services:
             - CLEANERBOT_TOKEN=${CLEANERBOT_TOKEN}
         ports:
             - "8087:8087"
+            - "8086:8086"

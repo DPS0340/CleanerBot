@@ -17,6 +17,7 @@ services:
       - CLEANERBOT_TOKEN=${CLEANERBOT_TOKEN1}
     ports:
       - "8087:8087"
+      - "8086:8086"
   clb2:
     restart: always
     image: a891/cleanerbot:latest
