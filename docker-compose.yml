@@ -18,6 +18,7 @@ services:
     ports:
       - "8087:8087"
       - "8086:8086"
+      - "8085:8085"
   clb2:
     restart: always
     image: a891/cleanerbot:latest
