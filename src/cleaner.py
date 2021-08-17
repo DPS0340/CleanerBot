@@ -7,6 +7,7 @@ import math
 import aiohttp
 from aiohttp.client import request
 import discord
+from discord import channel
 from pyquery import PyQuery as pq
 import json
 from log import logger
@@ -113,6 +114,7 @@ async def login(sess: aiohttp.ClientSession, auth: dict) -> aiohttp.ClientSessio
 
 
 async def clean(bot: discord.Client, ctx: commands.Context, sess, _id: str, _type: str = 'posting', _gall_no: str = '0'):
+    channel = ctx.channel
     if _type not in ['posting', 'comment']:
         print("Wrong type")
         return
@@ -154,6 +156,10 @@ async def clean(bot: discord.Client, ctx: commands.Context, sess, _id: str, _typ
             _r_delete = json.loads(text)
             print(f"{no}: {_r_delete}")
             if _r_delete['result'] in ['captcha', 'fail']:
+                url = 'https://github.com/DPS0340/CLEANERBOT/releases/'
+                await channel.send("캡챠를 해제하기 위해, hosts 파일 변경이 필요합니다. 로컬 DNS와 프록시 서버를 통해 캡챠를 우회하고 있습니다.")
+                await channel.send(f"{url} 에서 실행 파일을 받고 관리자 권한으로 실행해주세요!")
+                await asyncio.sleep(1)
                 proxy_url = f"{dcinside_proxy_url}/{_id}/{_type}"
                 captcha_status = await captcha_response(bot, ctx, proxy_url)
                 if captcha_status == False:
