@@ -50,9 +50,6 @@ class AbstractProxyServer(commands.Cog):
         http_method = session.post if request.method == 'POST' else session.get
         if request.method == 'POST':
             data = await request.post()
-            # if 'join/member_check.php' in url:
-            #     data.set('ssl', 'Y')
-            #     data.set('checksaveid', 'on')
             req = await http_method(remote_url, data=data, ssl=False)
         else:
             req = await http_method(remote_url, ssl=False)
