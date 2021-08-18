@@ -76,7 +76,7 @@ async def get_num(auth, _type: str = 'posting', _gall_no: str = '0') -> str:
     res = await sess.get(_url)
     text = await res.content.read()
     _d = pq(text)
-    raw_num = _d('.tit > .num').text()
+    raw_num = _d('.choice_sect > button > .num').text()
     raw_num = raw_num.replace(',', '')
     regex = re.compile('[\(](\d+)[\)]')
     matched = regex.match(raw_num)

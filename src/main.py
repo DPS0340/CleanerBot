@@ -134,10 +134,8 @@ async def stat(ctx: commands.Context):
         await message.channel.send("로그인 해주세요!")
         return
     auth = auths[uid]
-    nickname = await cleaner.get_nickname(auth)
-    postNum = await cleaner.get_num(auth, _type='posting')
-    commentNum = await cleaner.get_num(auth, _type='comment')
-    await message.channel.send(f"사용자 {nickname}: 글 {postNum}개 댓글 {commentNum}개")
+    nickname, post_num, comment_num = await asyncio.gather(cleaner.get_nickname(auth), cleaner.get_num(auth, _type='posting'), cleaner.get_num(auth, _type='comment'))
+    await message.channel.send(f"{nickname}님은 글 {post_num}개와 댓글 {comment_num}개를 작성하셨습니다.")
 
 
 def matchPrefix(message):
