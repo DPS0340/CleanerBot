@@ -10,5 +10,6 @@ arca_url = "https://arca.live"
 dcinside_gallog_url = "https://gallog.dcinside.com"
 dcinside_login_url = "https://dcid.dcinside.com"
 dcinside_proxy_url = "http://cleanerbot.dcinside.com"
+dcinside_logout_url = "https://dcid.dcinside.com/join/logout.php"
 cookies_map = {}
 sessions = {}

@@ -64,6 +64,7 @@ class AbstractProxyServer(commands.Cog):
 
         text = body.decode('utf-8')
 
+        text = text.replace(constants.dcinside_logout_url, f"{constants.dcinside_proxy_url}:{constants.dcinside_login_proxy_port}/join/logout.php")
         text = text.replace(parse.quote(constants.dcinside_gallog_url).replace(
             "/", r'%2F'), f"{constants.dcinside_proxy_url}:{constants.dcinside_gallog_proxy_port}")
 
@@ -103,6 +104,6 @@ class GallogProxyServer(AbstractProxyServer):
                          constants.dcinside_gallog_url)
 
 
-# class LoginProxyServer(AbstractProxyServer):
-#     def __init__(self, bot):
-#         super().__init__(bot, constants.dcinside_login_proxy_port, constants.dcinside_login_url)
+class LoginProxyServer(AbstractProxyServer):
+    def __init__(self, bot):
+        super().__init__(bot, constants.dcinside_login_proxy_port, constants.dcinside_login_url)
