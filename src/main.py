@@ -16,6 +16,7 @@ token = get_token()
 
 auths = dict()
 
+
 @bot.event
 async def on_ready():
     logging.info(f"bot ip address: {ip_address}")
