@@ -43,22 +43,19 @@ class AbstractProxyServer(commands.Cog):
 
         request_header = {**headers, 'Referer': remote_url,
                           'Origin': self.base_url, 'Host': self.base_url.replace('https://', '')}
-
+        
         if sessions.get(request.remote):
             session: aiohttp.ClientSession = sessions[request.remote]
         else:
             session = aiohttp.ClientSession()
             sessions[request.remote] = session
 
-        cookies = SimpleCookie(request.cookies)
-        session.cookie_jar.update_cookies(cookies, URL(self.base_url))
-
         http_method = session.post if request.method == 'POST' else session.get
         if request.method == 'POST':
             data = await request.post()
-            req = await http_method(remote_url, headers=request_header, data=data, ssl=False)
+            req = await http_method(remote_url, headers=request_header, data=data, ssl=True)
         else:
-            req = await http_method(remote_url, headers=request_header, ssl=False)
+            req = await http_method(remote_url, headers=request_header, ssl=True)
 
         body = await req.content.read()
         headers = req.headers.copy()
@@ -67,8 +64,6 @@ class AbstractProxyServer(commands.Cog):
 
         text = body.decode('utf-8')
 
-        text = text.replace(constants.dcinside_login_url,
-                            f"{constants.dcinside_proxy_url}:{constants.dcinside_login_proxy_port}")
         text = text.replace(parse.quote(constants.dcinside_gallog_url).replace(
             "/", r'%2F'), f"{constants.dcinside_proxy_url}:{constants.dcinside_gallog_proxy_port}")
 
@@ -81,11 +76,7 @@ class AbstractProxyServer(commands.Cog):
             del headers['Content-Encoding']
         if headers.get('Transfer-Encoding'):
             del headers['Transfer-Encoding']
-
-        # if headers.get('Set-Cookie'):
-        #     for cookie in headers.popall('Set-Cookie'):
-        #         cookie.replace('; secure', '')
-        #         headers.add('Set-Cookie', cookie)
+        
 
         return web.Response(**params)
 
@@ -112,6 +103,6 @@ class GallogProxyServer(AbstractProxyServer):
                          constants.dcinside_gallog_url)
 
 
-class LoginProxyServer(AbstractProxyServer):
-    def __init__(self, bot):
-        super().__init__(bot, constants.dcinside_login_proxy_port, constants.dcinside_login_url)
+# class LoginProxyServer(AbstractProxyServer):
+#     def __init__(self, bot):
+#         super().__init__(bot, constants.dcinside_login_proxy_port, constants.dcinside_login_url)
