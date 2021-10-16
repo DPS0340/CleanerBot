@@ -1,10 +1,56 @@
-version: "3.9"
+# 배포용 yml
+version: "3.6"
 services:
-    clb:
-        build: ..
-        environment:
-            - CLEANERBOT_TOKEN=${CLEANERBOT_TOKEN}
-        ports:
-            - "8087:8087"
-            - "8086:8086"
-            - "8085:8085"
+  watchtower:
+    container_name: cleanerbot-watchtower
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/docker:/etc/docker
+    command: --interval 30
+  clb1:
+    restart: always
+    image: a891/cleanerbot:latest
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    environment:
+      - CLEANERBOT_TOKEN=${CLEANERBOT_TOKEN1}
+    ports:
+      - "8087:8087"
+      - "8086:8086"
+      - "8085:8085"
+  clb2:
+    restart: always
+    image: a891/cleanerbot:latest
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    environment:
+      - CLEANERBOT_TOKEN=${CLEANERBOT_TOKEN2}
+  clb3:
+    restart: always
+    image: a891/cleanerbot:latest
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    environment:
+      - CLEANERBOT_TOKEN=${CLEANERBOT_TOKEN3}
+  clb4:
+    restart: always
+    image: a891/cleanerbot:latest
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    environment:
+      - CLEANERBOT_TOKEN=${CLEANERBOT_TOKEN4}
+  clb5:
+    restart: always
+    image: a891/cleanerbot:latest
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    environment:
+      - CLEANERBOT_TOKEN=${CLEANERBOT_TOKEN5}
+  clb6:
+    restart: always
+    image: a891/cleanerbot:latest
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    environment:
+      - CLEANERBOT_TOKEN=${CLEANERBOT_TOKEN6}
