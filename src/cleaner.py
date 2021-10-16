@@ -234,20 +234,21 @@ async def cleanArcaLive(bot: discord.Client, ctx: commands.Context, id: str, pw:
                 link = f'https://arca.live{link}/delete'
                 proxy_link = f'http://{ip_address}:{arca_proxy_port}{original_link}/delete'
                 delete_page = await s.get(link)
-
-                captcha_status = await captcha_response(bot, ctx, proxy_link)
-                if captcha_status == False:
-                    return
                 text = await delete_page.content.read()
                 _d = pq(text)
                 csrf = _d('input[name$="_csrf"]').val()
                 csrfdict = {'_csrf': csrf}
                 time.sleep(random.uniform(0.8, 2.2)) # 캡챠 방지용
                 res = await s.post(link, data=csrfdict)
-                if res.status == 429:
-
+                
+                if res.status in [200, 302]:
+                    continue
+                elif res.status == 429:
+                    captcha_status = await captcha_response(bot, ctx, proxy_link)
+                    if captcha_status == False:
+                        return
                     res = await s.post(link, data=csrfdict)
-                elif not (res.status == 200 or res.status == 302):
+                else:
                     # 삭제할 수 없는 글일시
                     # 삭제 인덱스 + 1 후 refresh
                     idx += 1
