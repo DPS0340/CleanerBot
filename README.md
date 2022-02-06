@@ -2,22 +2,77 @@
 
 빠르고 안전한 디시인사이드, 아카라이브 클리너 디스코드봇
 
-유용하게 쓰셨다면 **Star**를 눌러 주세요.
+현재 안정성 및 보안의 문제로 공식 봇의 형태로 배포하지 않고 있습니다.
 
-[공식 디스코드 서버](https://discord.gg/qYVBxnyAxa) (사용 권장)
+참고 문서를 보시면서 직접 코드를 클론받아 로컬에서 돌리시면 캡챠에 거의 걸리지 않고 사용할 수 있습니다.
 
-[초대 1](https://discord.com/api/oauth2/authorize?client_id=788454180837654558&permissions=2048&scope=bot)
+## 설치법
 
-[초대 2](https://discord.com/api/oauth2/authorize?client_id=842957656453021716&permissions=2048&scope=bot)
+### 도커 설치
 
-[초대 3](https://discord.com/api/oauth2/authorize?client_id=842959282164727840&permissions=2048&scope=bot)
+CleanerBot은 도커라이즈된 채로 배포됩니다. 도커를 설치해 주세요.
 
-[초대 4](https://discord.com/api/oauth2/authorize?client_id=842959311663530025&permissions=2048&scope=bot)
+윈도우 환경에서는 [도커 데스크탑](https://www.docker.com/products/docker-desktop)을 추천드립니다.
 
-[초대 5](https://discord.com/api/oauth2/authorize?client_id=842959338166419457&permissions=2048&scope=bot)
+### 봇 생성
 
-[초대 6](https://discord.com/api/oauth2/authorize?client_id=842959375403581450&permissions=2048&scope=bot)
+[디스코드 봇 만들기](https://lektion-von-erfolglosigkeit.tistory.com/65) 티스토리 문서를 참조하셔서 봇을 만드시고 토큰을 저장해주세요.
 
+### 환경 변수 저장
+
+방금 전에 생성한 토큰을 프로그램이 가져올 수 있는 위치에 저장해야 합니다.
+powershell이나 bash등의 터미널을 엽니다.
+
+Windows
+```
+set CLEANERBOT_TOKEN=토큰값
+```
+
+Linux/MacOS
+```
+export CLEANERBOT_TOKEN=토큰값
+```
+
+### 레포 클론
+
+git을 설치하여 주세요. 터미널 환경에서 적절한 폴더에서 레포를 클론받습니다.
+
+```
+git clone https://github.com/DPS0340/Cleanerbot
+```
+
+### 컨테이너 실행
+
+방금 받은 폴더로 들어가서 컨테이너를 실행합니다.
+
+```
+cd Cleanerbot
+docker-compose up -d --build
+```
+
+### hosts 파일 수정
+
+두 가지 방법중에 선호하는 방법 하나를 선택하시면 됩니다.
+
+이 작업은 존재하지 않는 서브도메인인 cleanerbot.dcinside.com을 캡챠 우회를 위해 127.0.0.1, 즉 자신의 IP에 연동하는 과정입니다.
+
+봇이 자신의 IP에서 돌아가는 상황이 아니라면 봇 서버의 IP로 수정해주시면 됩니다.
+
+#### 유틸리티 프로그램을 사용하는 간단한 방법
+
+https://github.com/DPS0340/CleanerBot/releases 에서 파일을 받으시고, 관리자 권한으로 실행하시면 hosts에 상기한 라우팅이 됩니다.
+
+#### 직접 hosts 파일 수정 (Windows 전용)
+
+관리자 권한으로 C:\Windows\System32\drivers\etc\hosts 파일을 직접 수정하셔서 마지막 부분에 한 줄을 추가합니다.
+
+```
+127.0.0.1 cleanerbot.dcinside.com
+```
+
+비주얼 스튜디오 코드를 사용하시면 관리자 권한으로 쉽게 저장할 수 있습니다. 그렇지 않다면 사본을 저장한 뒤 다시 경로로 옮겨줘야 합니다.
+
+이제 설치가 끝났습니다. 수고 많으셨습니다.
 
 ## 클리너 코어 부분
 
@@ -26,6 +81,8 @@
 이 자리를 빌어서 감사를 표합니다.
 
 ## CLEANERBOT 사용 설명서
+
+봇에게 멘션을 하시면 사용법이 나옵니다. 가급적이면 로그인같이 보안에 민감한 명령어는 다이렉트 메시지를 사용하시는 것을 추천드립니다.
 
 ### clb login id pw
 id와 pw를 통해 로그인합니다.
