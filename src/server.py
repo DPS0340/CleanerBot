@@ -43,7 +43,7 @@ class AbstractProxyServer(commands.Cog):
 
         request_header = {**headers, 'Referer': remote_url,
                           'Origin': self.base_url, 'Host': self.base_url.replace('https://', '')}
-        
+
         if sessions.get(request.remote):
             session: aiohttp.ClientSession = sessions[request.remote]
         else:
@@ -64,7 +64,8 @@ class AbstractProxyServer(commands.Cog):
 
         text = body.decode('utf-8')
 
-        text = text.replace(constants.dcinside_logout_url, f"{constants.dcinside_proxy_url}:{constants.dcinside_login_proxy_port}/join/logout.php")
+        text = text.replace(constants.dcinside_logout_url,
+                            f"{constants.dcinside_proxy_url}:{constants.dcinside_login_proxy_port}/join/logout.php")
         text = text.replace(parse.quote(constants.dcinside_gallog_url).replace(
             "/", r'%2F'), f"{constants.dcinside_proxy_url}:{constants.dcinside_gallog_proxy_port}")
 
@@ -77,7 +78,6 @@ class AbstractProxyServer(commands.Cog):
             del headers['Content-Encoding']
         if headers.get('Transfer-Encoding'):
             del headers['Transfer-Encoding']
-        
 
         return web.Response(**params)
 

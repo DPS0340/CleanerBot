@@ -20,7 +20,7 @@ auths = dict()
 @bot.event
 async def on_ready():
     logging.info(f"bot ip address: {ip_address}")
-    print('Logged on as {0}!'.format(bot.user))
+    logger.info('Logged on as {0}!'.format(bot.user))
 
 
 @bot.event
