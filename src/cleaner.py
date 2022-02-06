@@ -14,6 +14,7 @@ from log import logger
 from discord.ext import commands
 from constants import ip_address, arca_proxy_port, dcinside_proxy_url, dcinside_gallog_proxy_port
 import random
+from urllib.parse import quote_plus
 
 sessions = dict()
 header = {
@@ -43,6 +44,7 @@ async def captcha_response(bot: commands.Bot, ctx: commands.context, link: str):
 {link} 주소로 가셔서 로그인 후 삭제를 클릭 후 캡챠를 풀어주세요.
 캡챠를 푸신 다음, 이모지를 클릭 해주세요.""")
     await ask.add_reaction('🆗')
+
     def check(payload: discord.RawReactionActionEvent):
         return payload.message_id == ask.id and payload.user_id == ctx.author.id and str(payload.emoji) == '🆗'
 
@@ -54,6 +56,7 @@ async def captcha_response(bot: commands.Bot, ctx: commands.context, link: str):
     logger.info(f"Reaction clicked")
     await channel.send("해제 완료!")
     return True
+
 
 async def get_nickname(auth, _type: str = 'posting', _gall_no: str = '0') -> str:
     sess = make_session_if_not_exists(auth)
@@ -89,43 +92,56 @@ async def login(sess: aiohttp.ClientSession, auth: dict) -> aiohttp.ClientSessio
         sess = make_session_if_not_exists(auth)
     _id = auth['id']
     _pw = auth['pw']
-    _url = 'https://www.dcinside.com/'
+
+    redirect_url = f'https://gallog.dcinside.com/{_id}'
+    redirect_url = quote_plus(redirect_url)
+
+    _url = f'https://sign.dcinside.com/login?s_url={redirect_url}'
     res = await sess.get(_url)
     text = await res.content.read()
     _d = pq(text)
-    _data = dict(_d('#login_process input').serialize_dict())
+    _data = dict(_d('.inner form input').serialize_dict())
     _data['user_id'] = _id
     _data['pw'] = _pw
+    _data['ci_t'] = str(res.cookies['ci_c']).split(';')[0].split('=')[-1]
     time.sleep(1)  # 차단먹지마
-    res = await sess.get(_url)
-    text = await res.content.read()
-    _d = pq(text)
+
+    logger.info(_data)
+
     login_header = {
         **header,
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Host': 'dcid.dcinside.com',
-        'Origin': 'https://www.dcinside.com',
-        'Referer': 'https://www.dcinside.com/',
+        'Host': 'sign.dcinside.com',
+        'Origin': 'https://sign.dcinside.com',
+        'Referer': _url,
     }
-    _r = await sess.post('https://dcid.dcinside.com/join/member_check.php', data=_data, headers=login_header)
-    if 'history.back(-1)' in await _r.text():
-        raise Exception('login error')
+    _r = await sess.post('https://sign.dcinside.com/login/member_check', data=_data, headers=login_header)
+
+    logger.info(_r.status)
+
+    text = await _r.text()
+    logger.info(text)
+
+    if 'location.replace' in text:
+        await sess.get('https://sign.dcinside.com/campaign/password_change')
+        await sess.get('https://www.dcinside.com')
+
     return sess
 
 
 async def clean(bot: discord.Client, ctx: commands.Context, sess, _id: str, _type: str = 'posting', _gall_no: str = '0'):
     channel = ctx.channel
     if _type not in ['posting', 'comment']:
-        print("Wrong type")
+        logger.info("Wrong type")
         return
     gallog_url = f'https://gallog.dcinside.com/{_id}/{_type}'
-    _url = f"{gallog_url}?gno={_gall_no}"
+    _url = f"{gallog_url}?cno={_gall_no}"
     res = await sess.get(_url)
     text = await res.content.read()
     _d = pq(text)
     _last = _d('.cont_head.clear > .choice_sect > button.on > .num').text()
     _last = math.ceil(int(_last[1:-1].replace(',', '')) / 20)
-    print(_last, 'pages')
+    logger.info(f'{_last} pages')
     time.sleep(1)
 
     for _page in range(_last, 0, -1):
@@ -139,7 +155,7 @@ async def clean(bot: discord.Client, ctx: commands.Context, sess, _id: str, _typ
             _data = {
                 'ci_t': cookies.get('ci_c'),
                 'no': no,
-                'service_code': 'undefined' # 갤로그 개편 fix
+                'service_code': 'undefined'  # 갤로그 개편 fix
             }
             new_header = {
                 **header,
@@ -154,8 +170,8 @@ async def clean(bot: discord.Client, ctx: commands.Context, sess, _id: str, _typ
             res = await sess.post(url, data=_data, headers=new_header)
             text = await res.read()
             _r_delete = json.loads(text)
-            print(f"{no}: {_r_delete}")
-            if _r_delete['result'] in ['captcha', 'fail']:
+            logger.info(f"{no}: {_r_delete}")
+            if _r_delete['result'] in ['captcha']:
                 url = 'https://github.com/DPS0340/CLEANERBOT/releases/'
                 await channel.send("캡챠를 해제하기 위해, hosts 파일 변경이 필요합니다. 로컬 DNS와 프록시 서버를 통해 캡챠를 우회하고 있습니다.")
                 await channel.send(f"{url} 에서 실행 파일을 받고 관리자 권한으로 실행해주세요!")
@@ -238,9 +254,9 @@ async def cleanArcaLive(bot: discord.Client, ctx: commands.Context, id: str, pw:
                 _d = pq(text)
                 csrf = _d('input[name$="_csrf"]').val()
                 csrfdict = {'_csrf': csrf}
-                time.sleep(random.uniform(0.8, 2.2)) # 캡챠 방지용
+                time.sleep(random.uniform(0.8, 2.2))  # 캡챠 방지용
                 res = await s.post(link, data=csrfdict)
-                
+
                 if res.status in [200, 302]:
                     continue
                 elif res.status == 429:
