@@ -28,7 +28,7 @@ jobs:
         run: deno compile --output host-manager-darwin-x86_64 --target x86_64-apple-darwin --unstable --allow-read --allow-write --allow-net ./host-manager/index.ts
       -
         name: Compile Apple Darwin (aarch64)
-        run: deno compile --output host-manager-darwin-x86_64 --target aarch64-apple-darwin --unstable --allow-read --allow-write --allow-net ./host-manager/index.ts
+        run: deno compile --output host-manager-darwin-aarch64 --target aarch64-apple-darwin --unstable --allow-read --allow-write --allow-net ./host-manager/index.ts
       - 
         name: Release to Github
         uses: softprops/action-gh-release@v1
