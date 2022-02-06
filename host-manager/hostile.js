@@ -19,10 +19,10 @@ const HOSTS = WINDOWS
 
 export { HOSTS }
 
-function isIp(ip) {  
-  if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ip)) {  
-      return true 
-  }  
+function isIp(ip) {
+  if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ip)) {
+    return true
+  }
   return false
 }
 
@@ -51,7 +51,7 @@ export function getFile(filePath, preserveFormatting, cb) {
     })
     .on('error', cb)
 
-  function online (line) {
+  function online(line) {
     // Remove all comment text from the line
     var lineSansComments = line.replace(/#.*/, '')
     var matches = /^\s*?(.+?)\s+(.+?)\s*$/.exec(lineSansComments)
@@ -97,7 +97,7 @@ export function set(ip, host, cb) {
     _set(lines)
   })
 
-  function _set (lines) {
+  function _set(lines) {
     // Try to update entry, if host already exists in file
     lines = lines.map(mapFunc)
 
@@ -116,7 +116,7 @@ export function set(ip, host, cb) {
     writeFile(lines, cb)
   }
 
-  function mapFunc (line) {
+  function mapFunc(line) {
     // replace a line if both hostname and ip version of the address matches
     if (Array.isArray(line) && line[1] === host && isIp(line[0]) === isIp(ip)) {
       line[0] = ip
@@ -144,13 +144,13 @@ export function remove(ip, host, cb) {
     _remove(lines)
   })
 
-  function _remove (lines) {
+  function _remove(lines) {
     // Try to remove entry, if it exists
     lines = lines.filter(filterFunc)
     return writeFile(lines, cb)
   }
 
-  function filterFunc (line) {
+  function filterFunc(line) {
     return !(Array.isArray(line) && line[0] === ip && line[1] === host)
   }
 }
