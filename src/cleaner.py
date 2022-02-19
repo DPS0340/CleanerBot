@@ -173,7 +173,7 @@ async def clean(bot: discord.Client, ctx: commands.Context, sess, _id: str, _typ
             logger.info(f"{no}: {_r_delete}")
             if _r_delete['result'] in ['captcha']:
                 url = 'https://github.com/DPS0340/CLEANERBOT/releases/'
-                await channel.send("캡챠를 해제하기 위해, hosts 파일 변경이 필요합니다. 로컬 DNS와 프록시 서버를 통해 캡챠를 우회하고 있습니다.")
+                await channel.send("캡챠를 해제하기 위해, hosts 파일 변경이 필요합니다. 로컬 DNS를 수정해 프록시 서버와 연동하는 방법으로 방법으로 세션을 일치시키고 있습니다.")
                 await channel.send(f"{url} 에서 실행 파일을 받고 관리자 권한으로 실행해주세요!")
                 await asyncio.sleep(1)
                 proxy_url = f"{dcinside_proxy_url}:{dcinside_gallog_proxy_port}/{_id}/{_type}"
