@@ -248,7 +248,7 @@ async def cleanArcaLive(bot: discord.Client, ctx: commands.Context, id: str, pw:
                     link = link.replace("#c_", "/")
                 original_link = link
                 link = f'https://arca.live{link}/delete'
-                proxy_link = f'http://{ip_address}:{arca_proxy_port}{original_link}/delete'
+                proxy_link = f'http://{dcinside_proxy_url}:{arca_proxy_port}{original_link}/delete'
                 delete_page = await s.get(link)
                 text = await delete_page.content.read()
                 _d = pq(text)
