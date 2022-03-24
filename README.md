@@ -64,6 +64,10 @@ docker-compose up -d --build
 
 https://github.com/DPS0340/CleanerBot/releases 에서 파일을 받으시고, 관리자 권한으로 실행하시면 hosts에 상기한 라우팅이 됩니다.
 
+MacOS는 두 가지 아키텍처로 파편화되어 있어, x86 (인텔)의 경우 darwin-x86_64를 선택하시고, ARM (Apple Silicon)의 경우 darwin-aarch64를 선택하시면 됩니다.
+
+Linux 혹은 MacOS에서 ```error: Error: EACCES: permission denied, write```등의 오류가 발생하실 경우에는, 터미널을 열고 바이너리가 위치한 폴더로 cd 명령어를 통해 들어가신 후, ```sudo ./host-manager-linux-x86_64``` 명령어를 아키텍처에 따라 변경시켜서 바이너리를 실행하시면 됩니다.
+
 #### 직접 hosts 파일 수정 (Windows 전용)
 
 관리자 권한으로 C:\Windows\System32\drivers\etc\hosts 파일을 직접 수정하셔서 마지막 부분에 한 줄을 추가합니다.
