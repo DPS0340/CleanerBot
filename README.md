@@ -26,12 +26,12 @@ CleanerBot은 도커라이즈된 채로 배포됩니다. 도커를 설치해 주
 powershell이나 bash등의 터미널을 엽니다.
 
 Windows
-```
+```sh
 set CLEANERBOT_TOKEN=토큰값
 ```
 
 Linux/MacOS
-```
+```sh
 export CLEANERBOT_TOKEN=토큰값
 ```
 
@@ -39,7 +39,7 @@ export CLEANERBOT_TOKEN=토큰값
 
 git을 설치하여 주세요. 터미널 환경에서 적절한 폴더에서 레포를 클론받습니다.
 
-```
+```sh
 git clone https://github.com/DPS0340/Cleanerbot
 ```
 
@@ -47,7 +47,7 @@ git clone https://github.com/DPS0340/Cleanerbot
 
 방금 받은 폴더로 들어가서 컨테이너를 실행합니다.
 
-```
+```sh
 cd Cleanerbot
 docker-compose up -d --build
 ```
@@ -66,7 +66,13 @@ https://github.com/DPS0340/CleanerBot/releases 에서 파일을 받으시고, �
 
 MacOS는 두 가지 아키텍처로 파편화되어 있어, x86 (인텔)의 경우 darwin-x86_64를 선택하시고, ARM (Apple Silicon)의 경우 darwin-aarch64를 선택하시면 됩니다.
 
-Linux 혹은 MacOS에서 ```error: Error: EACCES: permission denied, write```등의 오류가 발생하실 경우에는, 터미널을 열고 바이너리가 위치한 폴더로 cd 명령어를 통해 들어가신 후, ```sudo ./host-manager-linux-x86_64``` 명령어를 아키텍처에 따라 변경시켜서 바이너리를 실행하시면 됩니다.
+Linux 혹은 MacOS 환경에서는 컴파일된 바이너리를 브라우저를 통해 다운받을 경우에는, 실행 권한이 부여되지 않기 때문에 터미널을 사용해서 실행하시면 관련된 문제를 해결할 수 있습니다.
+
+```sh
+cd Downloads # 다운로드 폴더 접근
+chmod +x ./host-manager-linux-x86_64 # 바이너리에 실행 권한 부여, 아키텍처에 맞게 파일명 적절히 수정 필요
+sudo ./host-manager-linux-x86_64 # 바이너리를 관리자 권한으로 실행
+```
 
 #### 직접 hosts 파일 수정 (Windows 전용)
 
