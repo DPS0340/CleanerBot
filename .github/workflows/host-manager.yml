@@ -29,6 +29,12 @@ jobs:
       -
         name: Compile Apple Darwin (aarch64)
         run: deno compile --output host-manager-darwin-aarch64 --target aarch64-apple-darwin --unstable --allow-read --allow-write --allow-net ./host-manager/index.ts
+      -
+        name: Add executable permission on *NIX binaries
+        run: |
+          chmod +x host-manager-linux-x86_64
+          chmod +x host-manager-darwin-x86_64
+          chmod +x host-manager-darwin-aarch64
       - 
         name: Release to Github
         uses: softprops/action-gh-release@v1
