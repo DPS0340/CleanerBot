@@ -16,7 +16,7 @@ jobs:
         name: Setup Deno
         uses: denoland/setup-deno@v1.1.0
         with:
-          deno-version: vx.x.x
+          deno-version: "1.19.3"
       -
         name: Compile linux
         run: deno compile --output host-manager-linux-x86_64 --target x86_64-unknown-linux-gnu --unstable --allow-read --allow-write --allow-net ./host-manager/index.ts
