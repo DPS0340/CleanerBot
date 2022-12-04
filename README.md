@@ -66,7 +66,7 @@ https://github.com/DPS0340/CleanerBot/releases 에서 파일을 받으시고, �
 
 MacOS는 두 가지 아키텍처로 파편화되어 있어, x86 (인텔)의 경우 darwin-x86_64를 선택하시고, ARM (Apple Silicon)의 경우 darwin-aarch64를 선택하시면 됩니다.
 
-Linux 혹은 MacOS 환경에서는 컴파일된 바이너리를 브라우저를 통해 다운받을 경우에는, 실행 권한이 부여되지 않기 때문에 터미널을 사용해서 관련된 커맨드를 입력하시면 관련된 문제를 해결할 수 있습니다.
+Linux 혹은 MacOS 환경에서는 컴파일된 바이너리를 웹으로 받을 경우에는 실행 권한이 부여되지 않기 때문에 터미널을 통해 아래의 커맨드를 입력하시면 문제를 해결할 수 있습니다.
 
 ```sh
 cd Downloads # 다운로드 폴더 접근, 폴더 이름과 경로에 따라 적절히 수정
@@ -77,6 +77,7 @@ sudo ./host-manager-linux-x86_64 # 바이너리를 관리자 권한으로 실행
 ### 직접 hosts 파일 수정
 
 관리자 권한으로 C:\Windows\System32\drivers\etc\hosts 파일을 직접 수정하셔서 마지막 부분에 한 줄을 추가합니다.
+
 Linux / MacOS의 경우 /etc/hosts 파일을 수정하시면 됩니다.
 
 ```
