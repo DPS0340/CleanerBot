@@ -74,9 +74,10 @@ chmod +x ./host-manager-linux-x86_64 # 바이너리에 실행 권한 부여, 아
 sudo ./host-manager-linux-x86_64 # 바이너리를 관리자 권한으로 실행
 ```
 
-#### 직접 hosts 파일 수정 (Windows 전용)
+### 직접 hosts 파일 수정
 
 관리자 권한으로 C:\Windows\System32\drivers\etc\hosts 파일을 직접 수정하셔서 마지막 부분에 한 줄을 추가합니다.
+Linux / MacOS의 경우 /etc/hosts 파일을 수정하시면 됩니다.
 
 ```
 127.0.0.1 cleanerbot.dcinside.com
