@@ -11,7 +11,14 @@ from constants import ip_address
 
 
 prefix = "clb "
-bot = commands.Bot(command_prefix=commands.when_mentioned_or(prefix))
+# discord.py 2.x부터 intents가 필수이며, 메시지 본문을 읽으려면
+# message_content 특권 인텐트를 개발자 포털에서도 켜줘야 한다.
+intents = discord.Intents.default()
+intents.message_content = True
+bot = commands.Bot(command_prefix=commands.when_mentioned_or(prefix),
+                   intents=intents)
+# 기본 help 명령어를 끄고 아래의 안내 embed를 사용한다.
+bot.help_command = None
 token = get_token()
 
 auths = dict()
@@ -24,11 +31,21 @@ async def on_ready():
 
 
 @bot.event
+async def setup_hook():
+    # 2.x에서 add_cog는 코루틴이라 이벤트 루프가 준비된 뒤 등록해야 한다.
+    await bot.add_cog(ArcaProxyServer(bot))
+    await bot.add_cog(GallogProxyServer(bot))
+    await bot.add_cog(LoginProxyServer(bot))
+
+
+@bot.event
 async def on_message(message):
     if message.author == bot.user:
         return
-    mention = f"<@!{bot.user.id}>"
-    if mention in message.content:
+    mention = bot.user.mention
+    # 디스코드는 멘션을 <@id> 또는 <@!id> 형태로 보낸다.
+    mentions = (f"<@{bot.user.id}>", f"<@!{bot.user.id}>")
+    if any(m in message.content for m in mentions):
         await help(message)
         return
     if not message.content.startswith(prefix):
@@ -154,7 +171,4 @@ def isDM(message):
 
 
 if __name__ == '__main__':
-    bot.add_cog(ArcaProxyServer(bot))
-    bot.add_cog(GallogProxyServer(bot))
-    bot.add_cog(LoginProxyServer(bot))
     bot.run(token)

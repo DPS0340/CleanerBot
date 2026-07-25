@@ -20,6 +20,14 @@ CleanerBot은 도커라이즈된 채로 배포됩니다. 도커를 설치해 주
 
 사용을 위해서는 개인 서버에 봇을 추가하셔야 합니다.
 
+#### Message Content Intent 활성화
+
+봇이 명령어를 읽으려면 특권 인텐트를 켜야 합니다.
+
+[디스코드 개발자 포털](https://discord.com/developers/applications)에서 봇을 선택하신 뒤 Bot 탭의 Privileged Gateway Intents에서 **MESSAGE CONTENT INTENT**를 켜고 저장해주세요.
+
+이 설정을 하지 않으면 봇이 메시지를 받아도 내용이 비어 있어 명령어가 동작하지 않습니다.
+
 ### 환경 변수 저장
 
 방금 전에 생성한 토큰을 프로그램이 가져올 수 있는 위치에 저장해야 합니다.

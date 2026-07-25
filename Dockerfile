@@ -6,6 +6,6 @@ COPY . .
 
 RUN pip install -r requirements.txt
 
-ENV PYTHONPATH /code
+ENV PYTHONPATH=/code
 
 CMD ["python", "/code/src/main.py"]

@@ -17,13 +17,23 @@ class AbstractProxyServer(commands.Cog):
         self.webserver_port = webserver_port
         self.base_url = base_url
         self.urls = {}
+        self.runner = None
         self.app.router.add_routes([
             web.get('', self.proxy_method),
             web.post('', self.proxy_method),
             web.get('/favicon.ico', self.favicon),
             web.get('/{url:.*}', self.proxy_method),
             web.post('/{url:.*}', self.proxy_method)])
+
+    async def cog_load(self):
+        # discord.py 2.x: Cog 등록 시점(이벤트 루프 실행 중)에 시작해야 한다.
+        # __init__에서 start()를 호출하면 RuntimeError: no running event loop 가 발생한다.
         self.web_server.start()
+
+    async def cog_unload(self):
+        self.web_server.cancel()
+        if self.runner:
+            await self.runner.cleanup()
 
     async def favicon(self, request: web.Request):
         return web.FileResponse('./assets/favicon.ico')
@@ -83,9 +93,9 @@ class AbstractProxyServer(commands.Cog):
 
     @ tasks.loop()
     async def web_server(self):
-        runner = web.AppRunner(self.app)
-        await runner.setup()
-        site = web.TCPSite(runner, host='0.0.0.0', port=self.webserver_port)
+        self.runner = web.AppRunner(self.app)
+        await self.runner.setup()
+        site = web.TCPSite(self.runner, host='0.0.0.0', port=self.webserver_port)
         await site.start()
 
     @ web_server.before_loop
