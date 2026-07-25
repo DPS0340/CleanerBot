@@ -116,3 +116,19 @@ id와 pw, 닉네임을 통해 아카라이브에 있는 글과 댓글을 지웁�
 id와 pw, 닉네임을 통해 아카라이브에 있는 글을 지웁니다.
 ### clb arca comment id pw nickname
 id와 pw, 닉네임을 통해 아카라이브에 있는 댓글을 지웁니다.
+
+### 아카라이브 캡챠 안내
+
+아카라이브는 로그인 시 Cloudflare Turnstile 캡챠를 요구하기 때문에, id와 pw만으로는 로그인이 되지 않을 수 있습니다.
+
+이 경우 브라우저에서 아카라이브에 로그인한 뒤, 개발자 도구(F12) → Application → Cookies에서 `arca.session2`와 `arca.session2.sig` 값을 복사해 아래 형식으로 사용하시면 됩니다.
+
+```
+clb arca session:<arca.session2 값> <arca.session2.sig 값> <닉네임>
+```
+
+`post` / `comment` 플래그도 동일하게 사용할 수 있습니다.
+
+```
+clb arca post session:<arca.session2 값> <arca.session2.sig 값> <닉네임>
+```

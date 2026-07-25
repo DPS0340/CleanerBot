@@ -58,6 +58,13 @@ async def help(message):
     embed.add_field(name=f"{prefix}arca comment id pw nickname",
                     value="id와 pw, 닉네임을 통해 아카라이브에 있는 댓글을 지웁니다.", inline=False)
     embed.add_field(
+        name="아카라이브 캡챠 안내",
+        value=("아카라이브가 로그인에 캡챠를 요구하는 경우, 브라우저에서 로그인 후 "
+               "쿠키의 `arca.session2`와 `arca.session2.sig` 값을 복사해 "
+               f"`{prefix}arca session:<arca.session2> <arca.session2.sig> <닉네임>` "
+               "형식으로 사용해주세요."),
+        inline=False)
+    embed.add_field(
         name=f"Github", value="https://github.com/DPS0340/CleanerBot", inline=False)
 
     await message.channel.send(embed=embed)
